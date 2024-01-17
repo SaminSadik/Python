@@ -29,4 +29,4 @@ print("Hacked -",person._locker__money, 'tk')
 person._locker__money = 0
 print("New :",person._locker__money, 'tk')
 
-# TODO: What is Encapsulation
+# private is used for encapsulation(hiding implementation details)

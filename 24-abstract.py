@@ -39,4 +39,4 @@ person.go(person.name)
 
 person.breath()
 
-# TODO: Abstract vs Interface
+# TODO: Learn - Abstract vs Interface, in OOP

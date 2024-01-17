@@ -57,9 +57,13 @@ fam1 = child_A()
 fam2 = child_B() #? why pB after pA instead of grand ?#
 print()
 
- #! Compositions:
+
 # Interitance -> "is a" relation
 # Composition -> "has a" relation
+
+
+ #! Compositions:
+
 class Strength:
     def start(self):
         print('Muscles Ready')
@@ -68,11 +72,12 @@ class Wisdom:
     def __init__(self) -> None:
         self.start = 'Brain is ON'
 
+# accessing other class through attributes instead of inheritance:
 class Human:
     def __init__(self) -> None:
         self.body = Strength()
         self.mind = Wisdom()
-    # composition is similar to inheritance
+    # composition is quite similar to inheritance
     
     def start(self):
         self.body.start()
