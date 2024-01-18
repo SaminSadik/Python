@@ -30,3 +30,5 @@ for val in dic: print(val, end=' ')
 
 print("\nSpecial looping for Dictionary:")
 for (key, val) in dic.items(): print(key,'=',val)
+
+ # TODO: How to search in a Dictionary
