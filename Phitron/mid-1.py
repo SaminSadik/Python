@@ -1,7 +1,7 @@
 class Star_Cinema:
     __hall_list = []
 
-    def __entry_hall(self, hall):
+    def _entry_hall(self, hall): # private doesn't work like this
         self.__hall_list.append(hall)
 
 class Hall(Star_Cinema):
@@ -11,11 +11,11 @@ class Hall(Star_Cinema):
         self.__rows = rows
         self.__cols = cols
         self.__hall_no = halls
-        super().__entry_hall(self)
+        super()._entry_hall(self)
 
-    def entry_show(self, id, movie, time):
-        #? check id
+    def entry_show(self, id, movie, time):     
         self.__show_list.append((id, movie, time))
+        self.__seats[id] = self.generate_seats(self.__rows, self.__cols)
 
     def book_seats(self, id, *args):
         #? check if seat is invalid or booked
@@ -31,6 +31,20 @@ class Hall(Star_Cinema):
         print('List of Available Seats:')
         for seat in self.__seats:
             print(seat)
+
+    def check_id(self, id) -> bool:
+        if id in self.__seats: return False
+        return True
+    
+    def generate_seats(rows, cols):
+        matrix = []
+        for row in range(ord('A'), ord('A') + rows):
+            row_values = []
+            for col in range(0, cols):
+                cell_value = f' {chr(row)}{col} '
+                row_values.append(cell_value)
+            matrix.append(row_values)
+        return matrix
 
 
 print('-------------------------------')
@@ -51,12 +65,15 @@ while(True):
         print('Thank you for visiting Star Cinema. Come again!')
         break
 
-    customer = Hall(5,5,'A1')
+    customer = Hall(5,6,'A1')
 
     if op == '4':
-        id = input('Enter show ID: ')
-        movie = input('Enter show Name: ')
-        time = input('Enter show Time: ')
+        id = input('Enter unique ID of the show: ')
+        while(customer.check_id(id) is False):
+            print(f'Sorry! A show with ID "{id}" already exits!')
+            id = input('Please try a different ID: ')
+        movie = input('Enter Name of the show: ')
+        time = input('Enter Time of the show: ')
         customer.entry_show(id, movie, time)
         print(f'You made a new entry. [Movie: {movie} (ID {id}) @ {time}]')
 

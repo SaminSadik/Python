@@ -30,3 +30,5 @@ person._locker__money = 0
 print("New :",person._locker__money, 'tk')
 
 # private is used for encapsulation(hiding implementation details)
+
+ # TODO: How differently does Private Methods work
