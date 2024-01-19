@@ -18,27 +18,34 @@ class Hall(Star_Cinema):
         self.__show_list.append((id, movie_name, time))
         self.__seats[id] = self.generate_seats(self.__rows, self.__cols)
 
-    def book_seats(self, id):
-        n = int(input('How many seats would you like to book: '))
-        if n==0: return
-        print("Great! Let's proceed one by one")
-        booked_seats = ()
+    def book_seats(self, id, seat_list):
+        n = len(seat_list)
         for i in range(n):
-            while(True):
-                cell = input('Enter an available seat to book: ')
-                row = ord(cell[0]) - ord('A')
-                col = ord(cell[1]) - ord('0')
-                if (len(cell)>2 or row<0 or row>4 or col<0 or col>5 or (cell in self._booked[id])):
-                    print('Invalid Entry!')
-                    self.view_available_seats(id)
-                    continue
-                self.__seats[id][row][col] = f'[{cell}]'
-                if id not in self._booked:
-                    self._booked[id] = []
-                self._booked[id].append(cell)
-                booked_seats.append(cell)
-                break
-        self.make_invoice(booked_seats)
+            row = seat_list[i][0]
+            col = seat_list[i][1]
+            seat_list[i] = f'{chr(row + ord("A"))}{col}'
+            self.__seats[id][row][col] = f'[{seat_list[i]}]'
+            if id not in self._booked: self._booked[id] = []
+            self._booked[id].append(seat_list[i])
+
+        print("Please provide necessary info for the invoice:")
+        nam = input("Name - ")
+        num = input("Contact Number - ")
+
+        print('-------------------------------')
+        print('      Booking Successful!      ')
+        print(f' Customer Name    : {nam}')
+        print(f' Customar Contact : {num}')
+        print(f' Hall Number      : {self.__hall_no}')
+        if(n>1): print(' Booked Seat      :', end=" ")
+        else: print(' Booked Seats     :', end=" ")
+        for i in range(n-1):
+            print(seat_list[i], end=', ')
+        print(seat_list[n-1])
+        # print(f' Movie Name       : {num}')
+        # print(f' Movie ID         : {num}')
+        # print(f' Movie Time       : {num}')
+        print('-------------------------------')
 
     def view_show_list(self):
         print('List of Ongoing Shows:')
@@ -47,13 +54,15 @@ class Hall(Star_Cinema):
 
     def view_available_seats(self, id):
         #? check id
-        print('List of Available Seats:')
+        print('-------------------------------')
+        print('   List of Available Seats :   ')
         for row in self.__seats[id]:
             matrix_line = ''
             for cell in row:
                 matrix_line += cell + ' '
             print(matrix_line)
-        print('N.B. []marked seats are already booked.')
+        print('N.B. []marked seats are booked.')
+        print('-------------------------------')
 
     def check_id(self, id) -> bool:
         if id in self.__seats: return True
@@ -68,21 +77,6 @@ class Hall(Star_Cinema):
                 row_values.append(cell_value)
             matrix.append(row_values)
         return matrix
-    
-    def make_invoice(list):
-        print("Please provide necessary info for the invoice:")
-        nam = input("Name - ")
-        num = input("Contact Number - ")
-        print('-------------------------------')
-        print('Booking Successful!')
-        print(f'Customer Name    : {nam}')
-        print(f'Customar Contact : {num}')
-        if(len(list)>1): print('Booked Seat      :', end=" ")
-        else: print('Booked Seats     :', end=" ")
-        for seat in list:
-            print(seat, end=' ')
-        #? show movie id, name, time, hall
-        print('-------------------------------')
 
 
 print('-------------------------------')
@@ -122,7 +116,38 @@ while(True):
             print(f"ID {id} does't match any available show!")
             customer.view_show_list()
             id = input("Enter a valid ID: ")
-        customer.book_seats(id)
+
+        n = ''
+        while(True):
+            n = input('How many seats would you like to book: ')
+            if n.isnumeric(): break
+            else: print('Invalid Entry! Try again') 
+        if n=='0':
+            print('Booking has been Cancelled')
+            continue
+
+        n = int(n)
+        if n>1: print('Enter available seats to book (separated by space):', end=' ')
+        else: print('Enter an available seat to book (separated by space):', end=' ')
+        seat_list = input().split()
+        for i in range(n):
+            while(True):
+                cell = seat_list[i]
+                row = ord(cell[0]) - ord('A')
+                col = ord(cell[1]) - ord('0')
+                if(len(cell)>2 or row<0 or row>4 or col<0 or col>5):
+                    print(f"Seat '{cell}' is invalid")
+                elif(cell in customer._booked[id]):
+                    print(f"Seat '{cell}' is already booked!")
+                elif((seat_list.count(cell)>1) or (seat_list.count((row, col))>0)):
+                    print("You can't book the same seat multiple times!")
+                else:
+                    seat_list[i] = (row, col)
+                    break
+                customer.view_available_seats(id)
+                seat_list[i] = input(f"Enter a valid Seat instead of '{cell}' : ")
+                
+        customer.book_seats(id, seat_list)
 
     if op == '2':   
         while(True):
