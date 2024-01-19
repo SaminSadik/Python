@@ -25,7 +25,7 @@ print_matrix(matrix)
 #print(matrix)
 
 while(True):
-    cell = input('Enter an available seat to buy: ')
+    cell = input('Enter an available seat to book: ')
     row = ord(cell[0]) - ord('A')
     col = ord(cell[1]) - ord('0')
     if (len(cell)>2 or row<0 or row>4 or col<0 or col>5):

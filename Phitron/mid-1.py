@@ -17,9 +17,19 @@ class Hall(Star_Cinema):
         self.__show_list.append((id, movie, time))
         self.__seats[id] = self.generate_seats(self.__rows, self.__cols)
 
-    def book_seats(self, id, *args):
+    def book_seats(self, id):
         #? check if seat is invalid or booked
-        pass
+        while(True):
+            cell = input('Enter an available seat to book: ')
+            row = ord(cell[0]) - ord('A')
+            col = ord(cell[1]) - ord('0')
+            if (len(cell)>2 or row<0 or row>4 or col<0 or col>5):
+                print('Invalid Entry!')
+                self.view_available_seats(id)
+                continue
+            self.__seats[id][row][col] = f'[{cell}]'
+            break
+        #? take personal info & confirm
 
     def view_show_list(self):
         print('List of Ongoing Shows:')
@@ -29,12 +39,16 @@ class Hall(Star_Cinema):
     def view_available_seats(self, id):
         #? check id
         print('List of Available Seats:')
-        for seat in self.__seats:
-            print(seat)
+        for row in self.__seats[id]:
+            matrix_line = ''
+            for cell in row:
+                matrix_line += cell + ' '
+            print(matrix_line)
+        print('N.B. []marked seats are already booked.')
 
     def check_id(self, id) -> bool:
-        if id in self.__seats: return False
-        return True
+        if id in self.__seats: return True
+        return False
     
     def generate_seats(rows, cols):
         matrix = []
@@ -69,7 +83,7 @@ while(True):
 
     if op == '4':
         id = input('Enter unique ID of the show: ')
-        while(customer.check_id(id) is False):
+        while(customer.check_id(id) is True):
             print(f'Sorry! A show with ID "{id}" already exits!')
             id = input('Please try a different ID: ')
         movie = input('Enter Name of the show: ')
@@ -78,11 +92,21 @@ while(True):
         print(f'You made a new entry. [Movie: {movie} (ID {id}) @ {time}]')
 
     if op == '3':
-        pass
+        id = input('Enter ID of your chosen show: ')
+        while(customer.check_id(id) is False):
+            print(f"ID {id} does't match any available show!")
+            customer.view_show_list()
+            id = input("Enter a valid ID: ")
+        customer.book_seats(id)
 
-    if op == '2':
-        id = input('Please enter the show ID: ')
-        customer.view_available_seats(id)
+    if op == '2':   
+        while(True):
+            id = input('Please enter the show ID: ')
+            if(customer.check_id(id) is False):
+                print(f'Invalid ID. Try again')
+                continue
+            customer.view_available_seats(id)
+            break
 
     if op == '1':
         customer.view_show_list()
