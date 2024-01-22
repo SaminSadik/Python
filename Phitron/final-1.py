@@ -9,18 +9,17 @@ def generateAC():
 
 print("---------------------------")
 print("Welcome to Terminal Banking")
-print("---------------------------")
 
 cmd = '0'
 signed = 'none'
 users = {}
 
 while(True):
+    print("---------------------------")
     print("What would you like to do ?")
-    if(signed is 'none'):
-        print("[1] Create an Account")
-        print("[2] Login to your Account")
-        print("[3] Exit")
+    print("[1] Create an Account")
+    print("[2] Login to your Account")
+    print("[3] Exit")
     print("---------------------------")
     cmd = input("ENTRY: ")
     print("---------------------------")
@@ -70,8 +69,29 @@ while(True):
         continue
 
     while(signed == 'user'):
-        pass
+        print("---------------------------")
+        print("What would you like to do ?")
+        print("[1] Check Balance")
+        print("[2] Withdraw Amount")
+        print("[3] Deposit Amount")
+        print("[4] Transfer Amount")
+        print("[5] Check Transaction History")
+        print("[6] Apply for Loan")
+        print("[0] Logout from Account")
+        print("---------------------------")
+        c = input("ENTRY: ")
+        print("---------------------------")
 
     while(signed == 'admin'):
-        pass
+        print("---------------------------")
+        print("What would you like to do ?")
+        print("[1] Check All Users")
+        print("[3] Delete a User account")
+        print("[2] Check Total Bank Balance")
+        print("[4] Check Loan amount")
+        print("[5] Toggle loan feature")
+        print("[0] Logout from Account")
+        print("---------------------------")
+        c = input("ENTRY: ")
+        print("---------------------------")
         
