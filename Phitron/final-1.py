@@ -1,23 +1,70 @@
 class User:
+    can_loan = True
+    Bank_Balance = 0
+    Bank_Loaned = 0
     def __init__(self, a,b,c,d,e,f,g,h,i):
-        self._access =  a
-        self._name = b
-        self.__address = c
-        self._ac_type = d
-        self._email = e
-        self.__pass = f
-        self._ac_number = g
-        self._balance = h
+        self.access =  a
+        self.name = b
+        self.address = c
+        self.ac_type = d
+        self.email = e
+        self.__password = f
+        self.__ac_number = g
+        self.__balance = h
         self._loaned = i
+        self._transactions = {}
 
-class Admin:
+    @property
+    def Balance(self):
+        print(f"Your Current Balance: {self.__balance}")
+
+    @Balance.setter
+    def Deposit(self, amount):
+        self.__balance += amount
+        self.Bank_Balance += amount
+        print(f"{amount}/- Diposited Successfully!")
+        self.Balance
+
+    @Balance.setter
+    def Withdraw(self, amount):
+        if(self.Bank_Balance < amount):
+            print("Oops! Bank is bankrupt")
+        elif(self.__balance >= amount):
+            self.__balance -= amount
+            self.Bank_Balance -= amount
+            print(f"{amount}/- Withdrawn Successfully!")
+            self.Balance
+        else:
+            print("Withdrawal amount exceeded")
+            self.Balance
+
+    @Balance.setter
+    def take_loan(self, amount):
+        if(self.can_loan is True) and (self.Bank_Balance >= amount):
+            if(self._loaned < 2):
+                self.Deposit(amount)
+                self._loaned += 1
+                self.Bank_Loaned += amount
+                self.Bank_Balance -= amount
+        else:
+            print("Sorry, This bank is not offering Loans at this moment!")
+
+    @Balance.setter
+    def transfer(self, ac_number, amount):
+        pass
+
+    def check_history(self):
+        pass
+
+
+class Admin(User):
     def __init__(self, a,b,c,d,e,f):
-        self._access =  a
-        self._name = b
-        self.__address = c
-        self._email = d
-        self.__pass = e
-        self._ac_number = f
+        self.access =  a
+        self.name = b
+        self.address = c
+        self.email = d
+        self.__password = e
+        self.__ac_number = f
 
 def generateAC():
     pass
@@ -27,7 +74,7 @@ print("Welcome to Terminal Banking")
 
 cmd = '0'
 signed = 'none'
-users = {}
+users = {} # make this only accessible by admin
 
 while(True):
     print("---------------------------")
@@ -62,12 +109,12 @@ while(True):
                     print("Invalid account type. Enter Savings or Current")
                 else: break
         _password = input("Enter a unique Password: ")
-        balance = 0
-        loaned = 0
         ac_number = generateAC()
         if(signed is 'admin'):
             users[email] = Admin(signed, name, address, email, _password, ac_number)
         else:
+            balance = 0
+            loaned = 0
             users[email] = User(signed, name, address, ac_type, email, _password, ac_number, balance, loaned)
         print("Account created Successfully!")
         print(f"Account Number: {ac_number}")
