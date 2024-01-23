@@ -1,8 +1,23 @@
 class User:
-    pass
+    def __init__(self, a,b,c,d,e,f,g,h,i):
+        self._access =  a
+        self._name = b
+        self.__address = c
+        self._ac_type = d
+        self._email = e
+        self.__pass = f
+        self._ac_number = g
+        self._balance = h
+        self._loaned = i
 
 class Admin:
-    pass
+    def __init__(self, a,b,c,d,e,f):
+        self._access =  a
+        self._name = b
+        self.__address = c
+        self._email = d
+        self.__pass = e
+        self._ac_number = f
 
 def generateAC():
     pass
@@ -34,29 +49,32 @@ while(True):
                 print("Invalid entry! Try again")
 
     if(cmd=='1'):
+        email = input("Enter a valid E-mail: ")
+        if email in users:
+            print("Email already exists! Please try again.")
+            continue
         name = input("Enter you Name: ")
         address = input("Enter your Address: ")
         if(signed is 'user'):
-            ac_type = input("Account Type (Savings/Current): ").lower()
-            while(ac_type!='savings' or ac_type!='current'):
-                print("Invalid account type. Enter Savings or Current")
+            while(True):
                 ac_type = input("Account Type (Savings/Current): ").lower()
-        email = input("Enter a valid E-mail: ")
-        while email in users:
-            print("Email already exists! Please try again.")
-            email = input("Enter a valid E-mail: ")
+                if(ac_type!='savings' or ac_type!='current'):
+                    print("Invalid account type. Enter Savings or Current")
+                else: break
         _password = input("Enter a unique Password: ")
+        balance = 0
+        loaned = 0
         ac_number = generateAC()
         if(signed is 'admin'):
-            users[email] = Admin(signed, ac_number, name, address, email, _password)
+            users[email] = Admin(signed, name, address, email, _password, ac_number)
         else:
-            users[email] = User(signed, ac_number, name, address, ac_type, email, _password)
+            users[email] = User(signed, name, address, ac_type, email, _password, ac_number, balance, loaned)
         print("Account created Successfully!")
         print(f"Account Number: {ac_number}")
         print("---------------------------")
 
     elif(cmd=='2'):
-        print("Enter Valid Login Info:")
+        print("Enter Valid Login Info -")
         email = input("E-mail: ")
         _password = input("Password: ")
         if (email not in users) or (_password != users[email._password]):
@@ -82,6 +100,24 @@ while(True):
         c = input("ENTRY: ")
         print("---------------------------")
 
+        if c == '1':
+            pass
+        elif c == '2':
+            pass
+        elif c == '3':
+            pass
+        elif c == '4':
+            pass
+        elif c == '5':
+            pass
+        elif c == '6':
+            pass
+        elif c == '0':
+            print("Logout Successful")
+            signed = 'none'
+        else:
+            print("Invalid Entry! Try entering 0-6")
+
     while(signed == 'admin'):
         print("---------------------------")
         print("What would you like to do ?")
@@ -94,4 +130,20 @@ while(True):
         print("---------------------------")
         c = input("ENTRY: ")
         print("---------------------------")
+
+        if c == '1':
+            pass
+        elif c == '2':
+            pass
+        elif c == '3':
+            pass
+        elif c == '4':
+            pass
+        elif c == '5':
+            pass
+        elif c == '0':
+            print("Logout Successful")
+            signed = 'none'
+        else:
+            print("Invalid Entry! Try entering 0-5")
         
