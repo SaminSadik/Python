@@ -1,7 +1,12 @@
-class User:
-    can_loan = True
+class Bank:
     Bank_Balance = 0
     Bank_Loaned = 0
+    can_loan = True
+    users = {}
+    def __init__(self) -> None:
+        pass
+
+class User(Bank):
     def __init__(self, a,b,c,d,e,f,g,h,i):
         self.access =  a
         self.name = b
@@ -21,17 +26,17 @@ class User:
     @Balance.setter
     def Deposit(self, amount):
         self.__balance += amount
-        self.Bank_Balance += amount
+        super().Bank_Balance += amount
         print(f"{amount}/- Diposited Successfully!")
         self.Balance
 
     @Balance.setter
     def Withdraw(self, amount):
-        if(self.Bank_Balance < amount):
+        if(super().Bank_Balance < amount):
             print("Oops! Bank is bankrupt")
         elif(self.__balance >= amount):
             self.__balance -= amount
-            self.Bank_Balance -= amount
+            super().Bank_Balance -= amount
             print(f"{amount}/- Withdrawn Successfully!")
             self.Balance
         else:
@@ -40,12 +45,12 @@ class User:
 
     @Balance.setter
     def take_loan(self, amount):
-        if(self.can_loan is True) and (self.Bank_Balance >= amount):
+        if(super().can_loan is True) and (super().Bank_Balance >= amount):
             if(self._loaned < 2):
                 self.Deposit(amount)
                 self._loaned += 1
-                self.Bank_Loaned += amount
-                self.Bank_Balance -= amount
+                super().Bank_Loaned += amount
+                super().Bank_Balance -= amount
         else:
             print("Sorry, This bank is not offering Loans at this moment!")
 
@@ -57,7 +62,7 @@ class User:
         pass
 
 
-class Admin(User):
+class Admin(Bank):
     def __init__(self, a,b,c,d,e,f):
         self.access =  a
         self.name = b
@@ -74,7 +79,7 @@ print("Welcome to Terminal Banking")
 
 cmd = '0'
 signed = 'none'
-users = {} # make this only accessible by admin
+op = Bank()
 
 while(True):
     print("---------------------------")
@@ -97,7 +102,7 @@ while(True):
 
     if(cmd=='1'):
         email = input("Enter a valid E-mail: ")
-        if email in users:
+        if email in op.users:
             print("Email already exists! Please try again.")
             continue
         name = input("Enter you Name: ")
@@ -111,11 +116,11 @@ while(True):
         _password = input("Enter a unique Password: ")
         ac_number = generateAC()
         if(signed is 'admin'):
-            users[email] = Admin(signed, name, address, email, _password, ac_number)
+            op.users[email] = Admin(signed, name, address, email, _password, ac_number)
         else:
             balance = 0
             loaned = 0
-            users[email] = User(signed, name, address, ac_type, email, _password, ac_number, balance, loaned)
+            op.users[email] = User(signed, name, address, ac_type, email, _password, ac_number, balance, loaned)
         print("Account created Successfully!")
         print(f"Account Number: {ac_number}")
         print("---------------------------")
@@ -124,10 +129,10 @@ while(True):
         print("Enter Valid Login Info -")
         email = input("E-mail: ")
         _password = input("Password: ")
-        if (email not in users) or (_password != users[email._password]):
+        if (email not in op.users) or (_password != op.users[email._password]):
             print("Invalid email or password! Please try again.")
         else:
-            print("Login Successful: Account No.", users[email].ac_number)
+            print("Login Successful: Account No.", op.users[email].ac_number)
         
     else:
         print("Invalid Entry! Try Entering 1-3\n")
