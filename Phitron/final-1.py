@@ -1,36 +1,37 @@
 class Bank:
     Bank_Balance = 0
-    Bank_Loaned = 0
-    can_loan = True
+    Loan_Given = 0
+    Can_Loan = True
     users = {}
     def __init__(self) -> None:
         pass
 
 class User(Bank):
-    def __init__(self, a,b,c,d,e,f,g,h,i):
-        self.access =  a
+    def __init__(self, a,b,c,d,e,f):
+        self.__ac_number = a
         self.name = b
         self.address = c
-        self.ac_type = d
-        self.email = e
-        self.__password = f
-        self.__ac_number = g
-        self.__balance = h
-        self._loaned = i
+        self.email = d
+        self.__password = e
+        self.ac_type = f
+        self.__balance = 0
+        self._loaned = 0
         self._transactions = {}
+        super().users[self.__ac_number] = [
+            self.name, self.address, self.email,
+            self.__password, self.ac_type
+        ]
 
     @property
     def Balance(self):
         print(f"Your Current Balance: {self.__balance}")
 
-    @Balance.setter
     def Deposit(self, amount):
         self.__balance += amount
         super().Bank_Balance += amount
         print(f"{amount}/- Diposited Successfully!")
         self.Balance
 
-    @Balance.setter
     def Withdraw(self, amount):
         if(super().Bank_Balance < amount):
             print("Oops! Bank is bankrupt")
@@ -43,18 +44,19 @@ class User(Bank):
             print("Withdrawal amount exceeded")
             self.Balance
 
-    @Balance.setter
     def take_loan(self, amount):
-        if(super().can_loan is True) and (super().Bank_Balance >= amount):
+        if(super().Can_Loan is True) and (super().Bank_Balance >= amount):
             if(self._loaned < 2):
                 self.Deposit(amount)
                 self._loaned += 1
-                super().Bank_Loaned += amount
+                super().Loan_Given += amount
                 super().Bank_Balance -= amount
         else:
             print("Sorry, This bank is not offering Loans at this moment!")
 
-    @Balance.setter
+    def pay_loan(self, amount):
+        pass
+
     def transfer(self, ac_number, amount):
         pass
 
@@ -63,13 +65,16 @@ class User(Bank):
 
 
 class Admin(Bank):
-    def __init__(self, a,b,c,d,e,f):
-        self.access =  a
+    def __init__(self, a,b,c,d,e):
+        self.__ac_number = a
         self.name = b
         self.address = c
         self.email = d
         self.__password = e
-        self.__ac_number = f
+        super().users[self.__ac_number] = [
+            self.name, self.address,
+            self.email, self.__password, None
+        ]
 
 def generateAC():
     pass
@@ -82,6 +87,7 @@ signed = 'none'
 op = Bank()
 
 while(True):
+    caller = None
     print("---------------------------")
     print("What would you like to do ?")
     print("[1] Create an Account")
@@ -116,23 +122,21 @@ while(True):
         _password = input("Enter a unique Password: ")
         ac_number = generateAC()
         if(signed is 'admin'):
-            op.users[email] = Admin(signed, name, address, email, _password, ac_number)
+            caller = Admin(ac_number, name, address, email, _password)
         else:
-            balance = 0
-            loaned = 0
-            op.users[email] = User(signed, name, address, ac_type, email, _password, ac_number, balance, loaned)
+            caller = User(ac_number, name, address, email, _password, ac_type)
         print("Account created Successfully!")
         print(f"Account Number: {ac_number}")
         print("---------------------------")
 
     elif(cmd=='2'):
         print("Enter Valid Login Info -")
-        email = input("E-mail: ")
-        _password = input("Password: ")
-        if (email not in op.users) or (_password != op.users[email._password]):
+        ac_no = input("Account Number: ")
+        password = input("Password: ")
+        if (ac_no not in op.users) or (password != op.users[ac_no][3]):
             print("Invalid email or password! Please try again.")
         else:
-            print("Login Successful: Account No.", op.users[email].ac_number)
+            print("Login Successful: Account No.", ac_no)
         
     else:
         print("Invalid Entry! Try Entering 1-3\n")
@@ -145,8 +149,9 @@ while(True):
         print("[2] Withdraw Amount")
         print("[3] Deposit Amount")
         print("[4] Transfer Amount")
-        print("[5] Check Transaction History")
-        print("[6] Apply for Loan")
+        print("[5] Apply for Loan")
+        print("[6] Payback Loan")
+        print("[7] Check Transaction History")
         print("[0] Logout from Account")
         print("---------------------------")
         c = input("ENTRY: ")
@@ -163,6 +168,8 @@ while(True):
         elif c == '5':
             pass
         elif c == '6':
+            pass
+        elif c == '7':
             pass
         elif c == '0':
             print("Logout Successful")
