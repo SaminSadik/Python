@@ -1,3 +1,11 @@
+"""
+TODO:
+* User transaction history
+* Admin show all users
+* generate account number
+* connect user/admin menu interactions
+"""
+
 class Bank:
     Bank_Balance = 0
     Loan_Given = 0
@@ -81,7 +89,11 @@ class Admin(Bank):
         pass
 
     def delete_user(self, acc_number):
-        pass # can't delete if another admin 
+        if super().users[acc_number][2] == 'admin':
+            print("Error! Can't delete another Admin account")
+        else:
+            del super().users[acc_number]
+            print(f"Account no. {acc_number} is Deleted successfully")
 
     @property
     def check_balance():
@@ -150,7 +162,7 @@ while(True):
         else:
             caller = User(ac_number, name, address, email, _password, ac_type)
 
-        op.users[ac_number] = [caller, name, address, email, _password, ac_type]
+        op.users[ac_number] = [caller, _password, signed]
         print("Account created Successfully!")
         print("Signed in to AC:", ac_no)
         print("---------------------------")
@@ -159,7 +171,7 @@ while(True):
         print("Enter Valid Login Info -")
         ac_no = input("Account Number: ")
         password = input("Password: ")
-        if (ac_no not in op.users) or (password != op.users[ac_no][4]):
+        if (ac_no not in op.users) or (password != op.users[ac_no][1]):
             print("Invalid AC number or password! Please try again.")
         else:
             print("Signed in to AC:", ac_no)
