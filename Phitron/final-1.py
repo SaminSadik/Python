@@ -1,16 +1,19 @@
-"""
-TODO:
-* generate account number
-* add more privacy, especially on Bank class
-"""
-
 import datetime
+import random
+valid_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
 
 class Bank:
     Bank_Balance = 0
     Loan_Given = 0
     Can_Loan = True
     users = {}
+
+    def generate_account(self, username):
+        while(True):
+            acNumber = username
+            for c in range(5):
+                acNumber += random.choice(valid_chars)
+            if acNumber not in self.users: return acNumber
 
 class User(Bank):
     def __init__(self, acNumber, name, address, email, acType):
@@ -139,9 +142,6 @@ class Admin(Bank):
         else: print("Loans Turned OFF: Users can't take loans now")
         
 
-def generateAC():
-    pass
-
 print("---------------------------")
 print("Welcome to Terminal Banking")
 
@@ -178,15 +178,27 @@ while(True):
     if(cmd=='1'):
         name = input("Enter you Name: ")
         address = input("Enter your Address: ")
-        email = input("Enter a valid E-mail: ")
+        email = ''
+        while(True):
+            email = input("Enter a valid E-mail: ")
+            if ('@' not in email) or ('.' not in email):
+                print("Invalid entry! Email must contain '@' and '.'")
+            elif len(email.split("@")[0]) < 5:
+                print("Invalid entry! Too short")
+            elif not all(c in valid_chars+'.@' for c in email):
+                print('Invalid character Error! Only use [a-z],[A-Z],[0-9],["@",".","_"]')
+            else:
+                print("* Email Varification: Valid *")
+                break
+
+        acNumber = op.generate_account(email.split("@")[0][:5])
+
         acType = None
         while(signed is 'user'):
             acType = input("Account Type (Savings/Current): ").lower()
             if(acType!='savings' and acType!='current'):
                 print("Invalid account type. Enter Savings or Current")
             else: break
-        
-        acNumber = generateAC()
 
         if(signed is 'admin'):
             caller = Admin(acNumber, name, address, email)
