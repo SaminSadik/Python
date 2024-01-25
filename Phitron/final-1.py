@@ -1,18 +1,17 @@
 """
 TODO:
-* User transaction history
 * generate account number
 * connect user/admin menu interactions
 * add more privacy, especially on Bank class
 """
+
+import datetime
 
 class Bank:
     Bank_Balance = 0
     Loan_Given = 0
     Can_Loan = True
     users = {}
-    def __init__(self) -> None:
-        pass
 
 class User(Bank):
     def __init__(self, acNumber, name, address, email, acType):
@@ -22,18 +21,22 @@ class User(Bank):
         self.__email = email
         self.__acType = acType
         self.__balance = 0
-        self.__loaned = 0
-        self.__transactions = {}
+        self.__loaned_time = 0
+        self.__loaned_amount = 0
+        self.__transactions = []
 
     @property
     def Balance(self):
         print(f"Your Current Balance: {self.__balance}")
 
     def Deposit(self, amount):
-        self.__balance += amount
-        super().Bank_Balance += amount
-        print(f"{amount}/- Diposited Successfully!")
-        self.Balance
+        amount = self.pay_loan(amount)
+        if(amount > 0):
+            self.__balance += amount
+            super().Bank_Balance += amount
+            print(f"{amount}/- Diposited Successfully!")
+            self.Balance
+            self.transaction('+', amount, 'Deposited')
 
     def Withdraw(self, amount):
         if(super().Bank_Balance < amount):
@@ -43,37 +46,65 @@ class User(Bank):
             super().Bank_Balance -= amount
             print(f"{amount}/- Withdrawn Successfully!")
             self.Balance
+            self.transaction('-', amount, 'Withdrawn')
         else:
             print("Withdrawal amount exceeded")
             self.Balance
 
     def take_loan(self, amount):
-        if(super().Can_Loan is True):
-            while(super().Bank_Balance < amount):
-                print(f"Sorry, current laon limit is {super().Bank_Balance}")
-                amount = int(input("New Loan Amount: "))
-                if(amount < 1):
-                    print("Loan Request is Cancelled")
-                    return
-
-            if(self.__loaned < 2):
+        if(super().Can_Loan is True) and (super().Bank_Balance > 0):
+            if(self.__loaned_time < 2):
+                while(super().Bank_Balance < amount):
+                    print(f"Sorry, current laon limit is {super().Bank_Balance}")
+                    amount = int(input("New Loan Amount: "))
+                    if(amount < 1):
+                        print("Loan Request is Cancelled")
+                        return
                 self.Deposit(amount)
-                self.__loaned += 1
+                self.__loaned_time += 1
+                self.__loaned_amount += amount
                 super().Loan_Given += amount
                 super().Bank_Balance -= amount
+                self.transaction('+', amount, 'Took Loan')
             else:
                 print("Denied! You've already taken max number of loans")
         else:
             print("Sorry, This bank is not offering Loans at this moment!")
+
+    def pay_loan(self, amount) -> int:
+        if(self.__loaned_amount>0):
+            will_pay = ''
+            while((will_pay != 'Y') and (will_pay != 'N')):
+                will_pay = input("Would you like to payback your loans (Y/N)? --")
+                if((will_pay != 'Y') and (will_pay != 'N')):
+                    print("Invalid entry! Enter Y or N please")
+            if(will_pay == 'Y'):
+                # check if amount > loan
+                self.__loaned_amount -= amount
+                super().Bank_Balance += amount
+                super().Loan_Given -= amount
+                print(f"Loan paid successfully! Now you have {self.__loaned_amount}/- loan left")
+                self.transaction('', amount, 'Paid Loan')
+                # return extra
+        return amount
+
 
     def transfer(self, acNumber, amount):
         reciever = super().users[acNumber][0]
         reciever.Deposit(amount)
         print(f"Successfully transfered {amount}/- to AC:{acNumber}")
         self.Balance
+        self.transaction('-', amount, 'Transfered')
+
+    def transaction(self, change, amount, note):
+        time = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        self.__transactions.append((time, change, amount, note))
 
     def check_history(self):
-        pass
+        counter = 1
+        for Tn in self.__transactions:
+            print(f"{counter}. {Tn[0]} [{Tn[3]}] {Tn[1]}{Tn[2]}/-")
+            counter += 1
 
 
 class Admin(Bank):
@@ -85,17 +116,16 @@ class Admin(Bank):
 
     def show_all_users(self):
         for user in super().users:
-            print("---------------------------")
-            ins = user[0]
-            print("Account Number  :", ins.__acNumber)
-            print("Access Type     :", user[2].upper())
-            print("User Name       :", ins.__name)
-            print("User E-Mail     :", ins.__email)
-            print("User Address    :", ins.__address)
             if(user[2]=='user'):
+                ins = user[0]
+                print("---------------------------")
+                print("Account Number  :", ins.__acNumber)
+                print("User Name       :", ins.__name)
+                print("User E-Mail     :", ins.__email)
+                print("User Address    :", ins.__address)
                 print("Account Type    :", ins.__acType)
                 print("Current Balance :", ins.__balance)
-                print("Loan Recieved   :", ins.__loaned)
+                print("Loan Recieved   :", ins.__loaned_time)
 
     def delete_user(self, acNumber):
         if super().users[acNumber][2] == 'admin':
@@ -109,7 +139,7 @@ class Admin(Bank):
         print("Current Bank Balance:", super().Bank_Balance)
 
     @property
-    def check__loaned():
+    def check__loaned_time():
         print("Total Loans Given:", super().Loan_Given)
 
     @property
