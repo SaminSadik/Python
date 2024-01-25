@@ -74,20 +74,20 @@ class User(Bank):
     def pay_loan(self, amount) -> int:
         if(self.__loaned_amount>0):
             will_pay = ''
-            while((will_pay != 'Y') and (will_pay != 'N')):
-                will_pay = input("Would you like to payback your loans (Y/N)? --")
-                if((will_pay != 'Y') and (will_pay != 'N')):
-                    print("Invalid entry! Enter Y or N please")
-            if(will_pay == 'Y'):
-                # check if amount > loan
+            while((will_pay != 'yes') and (will_pay != 'no')):
+                will_pay = input("Would you like to payback your loans? (yes/no) --").lower()
+                if((will_pay != 'yes') and (will_pay != 'no')):
+                    print("Invalid entry! Enter yes or no please")
+            if(will_pay == 'yes'):
+                extra = max(0, amount - self.__loaned_amount)
+                amount = min(amount, self.__loaned_amount)
                 self.__loaned_amount -= amount
                 super().Bank_Balance += amount
                 super().Loan_Given -= amount
                 print(f"Loan paid successfully! Now you have {self.__loaned_amount}/- loan left")
-                self.transaction('', amount, 'Paid Loan')
-                # return extra
+                self.transaction('~', amount, 'Paid Loan')
+                return extra
         return amount
-
 
     def transfer(self, acNumber, amount):
         reciever = super().users[acNumber][0]
@@ -139,7 +139,7 @@ class Admin(Bank):
         print("Current Bank Balance:", super().Bank_Balance)
 
     @property
-    def check__loaned_time():
+    def check_loaned():
         print("Total Loans Given:", super().Loan_Given)
 
     @property
@@ -236,7 +236,7 @@ while(True):
         print("---------------------------")
 
         if c == '1':
-            pass
+            caller.Balance
         elif c == '2':
             pass
         elif c == '3':
@@ -257,8 +257,8 @@ while(True):
         print("---------------------------")
         print("What would you like to do ?")
         print("[1] Check All Users")
-        print("[3] Delete a User account")
-        print("[2] Check Total Bank Balance")
+        print("[2] Delete a User account")
+        print("[3] Check Total Bank Balance")
         print("[4] Check Loan amount")
         print("[5] Toggle loan feature")
         print("[0] Logout from Account")
@@ -271,9 +271,9 @@ while(True):
         elif c == '2':
             pass
         elif c == '3':
-            pass
+            caller.check_balance
         elif c == '4':
-            pass
+            caller.check_loaned
         elif c == '5':
             pass
         elif c == '0':
