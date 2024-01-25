@@ -30,13 +30,11 @@ class User(Bank):
         print(f"Your Current Balance: {self.__balance}")
 
     def Deposit(self, amount):
-        amount = self.pay_loan(amount)
-        if(amount > 0):
-            self.__balance += amount
-            super().Bank_Balance += amount
-            self.transaction('+', amount, 'Deposited')
-            print(f"{amount}/- Diposited Successfully!")
-            self.Balance
+        self.__balance += amount
+        super().Bank_Balance += amount
+        self.transaction('+', amount, 'Deposited')
+        print(f"{amount}/- Diposited Successfully!")
+        self.Balance
 
     def Withdraw(self, amount):
         if(super().Bank_Balance < amount):
@@ -71,24 +69,13 @@ class User(Bank):
         else:
             print("Sorry, This bank is not offering Loans at this moment!")
 
-    def pay_loan(self, amount) -> int:
-        # might move some works from here to interaction menu
-        if(self.__loaned_amount>0):
-            will_pay = ''
-            while((will_pay != 'yes') and (will_pay != 'no')):
-                will_pay = input("Would you like to payback your loans? (yes/no) --").lower()
-                if((will_pay != 'yes') and (will_pay != 'no')):
-                    print("Invalid entry! Enter yes or no please")
-            if(will_pay == 'yes'):
-                extra = max(0, amount - self.__loaned_amount)
-                amount = min(amount, self.__loaned_amount)
-                self.__loaned_amount -= amount
-                super().Bank_Balance += amount
-                super().Loan_Given -= amount
-                print(f"Loan paid successfully! Now you have {self.__loaned_amount}/- loan left")
-                self.transaction('~', amount, 'Paid Loan')
-                return extra
-        return amount
+    def pay_loan(self, amount):
+        self.__loaned_amount -= amount
+        super().Bank_Balance += amount
+        super().Loan_Given -= amount
+        self.transaction('~', amount, 'Paid Loan')
+        print("Loan paid successfully!", end = ' ')
+        if(self.__loaned_amount != 0): print(f"Now you have {self.__loaned_amount}/- loan left")
 
     def transfer(self, acNumber, amount):
         reciever = super().users[acNumber][0]
@@ -116,9 +103,9 @@ class Admin(Bank):
         self.__email = email
 
     def show_all_users(self):
-        for user in super().users:
-            if(user[2]=='user'):
-                ins = user[0]
+        for (key, val) in super().users.items():
+            if(val[2]=='user'):
+                ins = val[0]
                 print("---------------------------")
                 print("Account Number  :", ins.__acNumber)
                 print("User Name       :", ins.__name)
@@ -238,19 +225,57 @@ while(True):
 
         if c == '1':
             caller.Balance
+
         elif c == '2':
-            pass
+            amount = input("Enter withdrawal Amount: ")
+            if amount.isnumeric() and (amount != '0'): caller.Withdraw(int(amount))
+            else: print("Invalid Entry")
+
         elif c == '3':
-            pass
+            amount = input("Enter Deposit Amount: ")
+            if amount.isnumeric() and (amount != '0'):
+                amount = int(amount)
+                if(caller.__loaned_amount > 0):
+                    will_pay = ''
+                    while(True):
+                        will_pay = input("Are you paying loans? (yes/no) --").lower()
+                        if((will_pay != 'yes') and (will_pay != 'no')):
+                            print("Invalid entry! Enter yes or no please")
+                        else: break
+                    if(will_pay == 'yes'):
+                        caller.pay_loan(min(amount, caller.__loaned_amount))
+                        amount = max(0, (amount - caller.__loaned_amount))
+                if(amount>0): caller.Deposit(amount)
+            else: print("Invalid Entry")
+
         elif c == '4':
-            pass
+            if(caller.__balance == 0):
+                print("Transfer failed! Your balance is empty")
+                continue
+
+            acNumber = input("Enter reciever account number: ")
+            if acNumber not in op.users:
+                print("Transfer failed! There is no such account in this bank")
+                continue
+            while(True):
+                amount = input("Enter transfer amount: ")
+                if (not amount.isnumeric()) or (int(amount) > caller.__balance):
+                    print("Invalid amount! Try again")
+                    caller.Balance
+                else:
+                    caller.transfer(acNumber, int(amount))
+                    break
+
         elif c == '5':
             pass
+
         elif c == '6':
             pass
+
         elif c == '0':
             print("Logout Successful")
             break
+
         else:
             print("Invalid Entry! Try entering 0-6")
 

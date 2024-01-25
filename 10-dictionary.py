@@ -25,8 +25,8 @@ print('Befor Deleting Income:',dic)
 del dic['income'] # deletes the key & its value
 print('After Deleting Income:',dic)
 
-print("\nNormal Loop Only Iterates for Value:", end=" ")
-for val in dic: print(val, end=' ')
+print("\nNormal Loop Only Iterates for Key:", end=" ")
+for key in dic: print(key, end=' ')
 
 print("\nSpecial looping for Dictionary:")
 for (key, val) in dic.items(): print(key,'=',val)
