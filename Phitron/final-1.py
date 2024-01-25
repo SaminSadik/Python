@@ -1,9 +1,9 @@
 """
 TODO:
 * User transaction history
-* Admin show all users
 * generate account number
 * connect user/admin menu interactions
+* add more privacy, especially on Bank class
 """
 
 class Bank:
@@ -15,16 +15,15 @@ class Bank:
         pass
 
 class User(Bank):
-    def __init__(self, a,b,c,d,e,f):
-        self.__ac_number = a
-        self.name = b
-        self.address = c
-        self.email = d
-        self.__password = e
-        self.ac_type = f
+    def __init__(self, acNumber, name, address, email, acType):
+        self.__acNumber = acNumber
+        self.__name = name
+        self.__address = address
+        self.__email = email
+        self.__acType = acType
         self.__balance = 0
-        self._loaned = 0
-        self._transactions = {}
+        self.__loaned = 0
+        self.__transactions = {}
 
     @property
     def Balance(self):
@@ -57,9 +56,9 @@ class User(Bank):
                     print("Loan Request is Cancelled")
                     return
 
-            if(self._loaned < 2):
+            if(self.__loaned < 2):
                 self.Deposit(amount)
-                self._loaned += 1
+                self.__loaned += 1
                 super().Loan_Given += amount
                 super().Bank_Balance -= amount
             else:
@@ -67,10 +66,10 @@ class User(Bank):
         else:
             print("Sorry, This bank is not offering Loans at this moment!")
 
-    def transfer(self, ac_number, amount):
-        reciever = super().users[ac_number][0]
+    def transfer(self, acNumber, amount):
+        reciever = super().users[acNumber][0]
         reciever.Deposit(amount)
-        print(f"Successfully transfered {amount}/- to AC:{ac_number}")
+        print(f"Successfully transfered {amount}/- to AC:{acNumber}")
         self.Balance
 
     def check_history(self):
@@ -78,29 +77,39 @@ class User(Bank):
 
 
 class Admin(Bank):
-    def __init__(self, a,b,c,d,e):
-        self.__ac_number = a
-        self.name = b
-        self.address = c
-        self.email = d
-        self.__password = e
+    def __init__(self, acNumber, name, address, email):
+        self.__acNumber = acNumber
+        self.__name = name
+        self.__address = address
+        self.__email = email
 
     def show_all_users(self):
-        pass
+        for user in super().users:
+            print("---------------------------")
+            ins = user[0]
+            print("Account Number  :", ins.__acNumber)
+            print("Access Type     :", user[2].upper())
+            print("User Name       :", ins.__name)
+            print("User E-Mail     :", ins.__email)
+            print("User Address    :", ins.__address)
+            if(user[2]=='user'):
+                print("Account Type    :", ins.__acType)
+                print("Current Balance :", ins.__balance)
+                print("Loan Recieved   :", ins.__loaned)
 
-    def delete_user(self, acc_number):
-        if super().users[acc_number][2] == 'admin':
+    def delete_user(self, acNumber):
+        if super().users[acNumber][2] == 'admin':
             print("Error! Can't delete another Admin account")
         else:
-            del super().users[acc_number]
-            print(f"Account no. {acc_number} is Deleted successfully")
+            del super().users[acNumber]
+            print(f"Account no. {acNumber} is Deleted successfully")
 
     @property
     def check_balance():
         print("Current Bank Balance:", super().Bank_Balance)
 
     @property
-    def check_loaned():
+    def check__loaned():
         print("Total Loans Given:", super().Loan_Given)
 
     @property
@@ -148,34 +157,35 @@ while(True):
         name = input("Enter you Name: ")
         address = input("Enter your Address: ")
         email = input("Enter a valid E-mail: ")
-        ac_type = None
+        acType = None
         while(signed is 'user'):
-            ac_type = input("Account Type (Savings/Current): ").lower()
-            if(ac_type!='savings' and ac_type!='current'):
+            acType = input("Account Type (Savings/Current): ").lower()
+            if(acType!='savings' and acType!='current'):
                 print("Invalid account type. Enter Savings or Current")
             else: break
-        _password = input("Enter new Password: ")
-        ac_number = generateAC()
+        
+        acNumber = generateAC()
 
         if(signed is 'admin'):
-            caller = Admin(ac_number, name, address, email, _password)
+            caller = Admin(acNumber, name, address, email)
         else:
-            caller = User(ac_number, name, address, email, _password, ac_type)
+            caller = User(acNumber, name, address, email, acType)
 
-        op.users[ac_number] = [caller, _password, signed]
+        password = input("Enter new Password: ")
+        op.users[acNumber] = (caller, password, signed)
         print("Account created Successfully!")
-        print("Signed in to AC:", ac_no)
+        print("Signed in to AC:", acNumber)
         print("---------------------------")
 
     elif(cmd=='2'):
         print("Enter Valid Login Info -")
-        ac_no = input("Account Number: ")
+        acNumber = input("Account Number: ")
         password = input("Password: ")
-        if (ac_no not in op.users) or (password != op.users[ac_no][1]):
+        if (acNumber not in op.users) or (password != op.users[acNumber][1]):
             print("Invalid AC number or password! Please try again.")
         else:
-            print("Signed in to AC:", ac_no)
-            caller = op.users[ac_no][0]
+            print("Signed in to AC:", acNumber)
+            caller = op.users[acNumber][0]
         
     else:
         print("Invalid Entry! Try Entering 1-3\n")
