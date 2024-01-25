@@ -3,31 +3,24 @@ import random
 valid_chars = "0123456789_abcdefghijklmnopqrstuvwxyz"
 
 class Bank:
-    __Bank_Balance = 0
-    __Loan_Given = 0
-    __Can_Loan = True
-    users = {}
+    _Bank_Balance = 0
+    _Loan_Given = 0
+    _Can_Loan = True
+    _users = {}
 
     def generate_account(self, username):
         while(True):
             acNumber = username
             for c in range(5):
                 acNumber += random.choice(valid_chars)
-            if acNumber not in self.users: return acNumber
-
-    @property
-    def Balance(self) -> int: return self.__Bank_Balance
-    @property
-    def Loaned(self) -> int: return self.__Loan_Given
-    @property
-    def Can_Loan(self) -> bool: return self.__Can_Loan
+            if acNumber not in self._users: return acNumber
 
     def set_balance(self, amount):
-        self.__Bank_Balance += amount
+        self._Bank_Balance += amount
     def set_loaned(self, amount):
-        self.__Loan_Given += amount
-    def toggle_loan(self, New):
-        self.__Can_Loan = New
+        self._Loan_Given += amount
+    def Loan_feature(self, New):
+        self._Can_Loan = New
 
 
 class User(Bank):
@@ -48,44 +41,47 @@ class User(Bank):
     @property
     def Loaned(self) -> int: return self.__loaned_amount
 
+    @property
+    def account(self) -> str: return self.__acNumber
+
     def show_Balance(self):
         print(f"Your Current Balance: {self.__balance}/-")
 
     def Deposit(self, amount):
         self.__balance += amount
-        super().set_balance(amount)
+        Bank._Bank_Balance += amount
         self.transaction('+', amount, 'Deposited')
         print(f"{amount}/- Diposited Successfully!")
-        # self.show_Balance()
+        self.show_Balance()
 
     def Withdraw(self, amount):
         if(self.__balance < amount):
             print("Withdrawal amount exceeded")
             self.show_Balance()
-        elif(super().Balance < amount):
+        elif(super()._Bank_Balance < amount):
             print("Oops! We are bankrupt")
-            if(super().Balance > 0):
-                limit = min(super().Balance, self.__balance)
+            if(super()._Bank_Balance > 0):
+                limit = min(super()._Bank_Balance, self.__balance)
                 print(f"Your current withdrawal limit: {limit}/-")
         else:
             self.__balance -= amount
-            super().set_balance(-1 * amount)
+            Bank._Bank_Balance -= amount
             self.transaction('-', amount, 'Withdrawn')
             print(f"{amount}/- Withdrawn Successfully!")
             self.show_Balance()
 
     def take_loan(self):
-        if(super().Can_Loan is True) and (super().Balance > 0):
+        if(super()._Can_Loan is True) and (super()._Bank_Balance > 0):
             if(self.__loaned_time < 2):
                 amount = int(input("Enter loan amount: "))
-                if(super().Balance < amount):
-                    print(f"Sorry, current laon limit is {super().Balance}")
+                if(super()._Bank_Balance < amount):
+                    print(f"Sorry, current laon limit is {super()._Bank_Balance}")
                 else:
                     self.Deposit(amount)
                     self.__loaned_time += 1
                     self.__loaned_amount += amount
-                    super().set_loaned(amount)
-                    super().set_balance(-1 * amount)
+                    Bank._Loan_Given += amount
+                    Bank._Bank_Balance -= amount
                     self.transaction('+', amount, 'Took Loan')
             else:
                 print("Denied! You've already taken max number of loans")
@@ -94,15 +90,16 @@ class User(Bank):
 
     def pay_loan(self, amount):
         self.__loaned_amount -= amount
-        super().set_balance(amount)
-        super().set_loaned(-1 * amount)
+        Bank._Loan_Given -= amount
+        Bank._Bank_Balance += amount
         self.transaction('~', amount, 'Paid Loan')
         print("Loan paid successfully!", end = ' ')
         if(self.__loaned_amount != 0): print(f"Now you have {self.__loaned_amount}/- loan left")
 
     def transfer(self, acNumber, amount):
-        reciever = super().users[acNumber][0]
-        reciever.Deposit(amount)
+        reciever = super()._users[acNumber][0]
+        reciever.__balance += amount
+        reciever.transaction('+', amount, 'Transfered')
         self.__balance -= amount
         self.transaction('-', amount, 'Transfered')
         print(f"Successfully transfered {amount}/- to AC:{acNumber}")
@@ -122,6 +119,7 @@ class User(Bank):
 
     def __repr__(self) -> str:
         rep = f"""
+        Access Type     :User
         Account Number  :{self.__acNumber}
         User Name       :{self.__name}
         User E-Mail     :{self.__email}
@@ -140,31 +138,40 @@ class Admin(Bank):
         self.__address = address
         self.__email = email
 
-    def show_all_users(self):
-        for (key, val) in super().users.items():
-            if(val[2]=='user'):
-                print(val[0])
+    def show_all__users(self):
+        for (key, val) in super()._users.items():
+            print(val[0])
 
     def delete_user(self, acNumber):
-        if super().users[acNumber][2] == 'admin':
-            print("Error! Can't delete another Admin account")
+        if super()._users[acNumber][2] == 'admin':
+            print("Error! Can't delete an Admin account")
         else:
-            del super().users[acNumber]
+            del super()._users[acNumber]
             print(f"Account no. {acNumber} is Deleted successfully")
 
     @property
     def check_balance(self):
-        print("Current Bank Balance:", super().Balance)
+        print("Current Bank Balance:", super()._Bank_Balance)
 
     @property
     def check_loaned(self):
-        print("Total Loans Given:", super().Loaned)
+        print("Total Loans Given:", super()._Loan_Given)
 
-    #@property
+    @property
     def toggle_loan(self):
-        super().Can_Loan = not super().Can_Loan
-        if(super().Can_Loan is True): print("Loans Turned ON: Users can take loans now")
-        else: print("Loans Turned OFF: Users can't take loans now")
+        Bank._Can_Loan = not Bank._Can_Loan
+        if(super()._Can_Loan is True): print("Loans Turned ON: _users can take loans now")
+        else: print("Loans Turned OFF: _users can't take loans now")
+
+    def __repr__(self) -> str:
+        rep = f"""
+        Access Type     :Admin
+        Account Number  :{self.__acNumber}
+        User Name       :{self.__name}
+        User E-Mail     :{self.__email}
+        User Address    :{self.__address}
+        """
+        return rep
         
 
 print("---------------------------")
@@ -231,7 +238,7 @@ while(True):
             caller = User(acNumber, name, address, email, acType)
 
         password = input("Enter new Password: ")
-        op.users[acNumber] = (caller, password, signed)
+        op._users[acNumber] = (caller, password, signed)
         print("Account created Successfully!")
         print("Signed in to AC:", acNumber)
 
@@ -239,12 +246,12 @@ while(True):
         print("Enter Valid Login Info -")
         acNumber = input("Account Number: ")
         password = input("Password: ")
-        if (acNumber not in op.users) or (password != op.users[acNumber][1]):
+        if (acNumber not in op._users) or (password != op._users[acNumber][1]):
             print("Invalid AC number or password! Please try again.")
             continue
         else:
             print("Signed in to AC:", acNumber)
-            caller = op.users[acNumber][0]
+            caller = op._users[acNumber][0]
         
     else:
         print("Invalid Entry! Try Entering 1-3\n")
@@ -284,11 +291,10 @@ while(True):
                             print("Invalid entry! Enter yes or no please")
                         else: break
                     if(will_pay == 'yes'):
-                        caller.pay_loan(min(amount, caller.Loaned))
-                        amount = max(0, (amount - caller.Loaned))
-                if(amount>0):
-                    caller.Deposit(amount)
-                    caller.show_Balance()
+                        curr_loan = caller.Loaned
+                        caller.pay_loan(min(amount, curr_loan))
+                        amount = max(0, (amount - curr_loan))
+                if(amount>0): caller.Deposit(amount)
             else: print("Invalid Entry")
 
         elif c == '4':
@@ -297,20 +303,21 @@ while(True):
                 continue
 
             acNumber = input("Enter reciever account number: ")
-            if acNumber not in op.users:
+            if acNumber not in op._users:
                 print("Transfer failed! There is no such account in this bank")
-                continue
-            elif op.users[acNumber][2] == 'admin':
+            elif op._users[acNumber][2] == 'admin':
                 print("You can't transfer money to an Admin!")
-                continue
-            while(True):
-                amount = input("Enter transfer amount: ")
-                if (not amount.isnumeric()) or (int(amount) > caller.Balance):
-                    print("Invalid amount! Try again")
-                    caller.show_Balance()
-                else:
-                    caller.transfer(acNumber, int(amount))
-                    break
+            elif acNumber == caller.account:
+                print("You can't transfer money to yourself!")
+            else:
+                while(True):
+                    amount = input("Enter transfer amount: ")
+                    if (not amount.isnumeric()) or (int(amount) > caller.Balance):
+                        print("Invalid amount! Try again")
+                        caller.show_Balance()
+                    else:
+                        caller.transfer(acNumber, int(amount))
+                        break
 
         elif c == '5':
             caller.take_loan()
@@ -328,7 +335,7 @@ while(True):
     while(signed == 'admin'):
         print("---------------------------")
         print("What would you like to do ?")
-        print("[1] Check All Users")
+        print("[1] Check All users")
         print("[2] Delete a User account")
         print("[3] Check Total Bank Balance")
         print("[4] Check Loan amount")
@@ -339,10 +346,10 @@ while(True):
         print("---------------------------")
 
         if c == '1':
-            caller.show_all_users()
+            caller.show_all__users()
         elif c == '2':
             acNumber = input("Enter Account number to delete: ")
-            if acNumber not in op.users:
+            if acNumber not in op._users:
                 print("Failed! There is no such account in this bank")
             else: caller.delete_user(acNumber)
         elif c == '3':
@@ -350,7 +357,7 @@ while(True):
         elif c == '4':
             caller.check_loaned
         elif c == '5':
-            caller.toggle_loan()
+            caller.toggle_loan
         elif c == '0':
             print("Logout Successful")
             break
