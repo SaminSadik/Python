@@ -1,7 +1,6 @@
 """
 TODO:
 * generate account number
-* connect user/admin menu interactions
 * add more privacy, especially on Bank class
 """
 
@@ -52,9 +51,10 @@ class User(Bank):
             print(f"{amount}/- Withdrawn Successfully!")
             self.Balance
 
-    def take_loan(self, amount):
+    def take_loan(self):
         if(super().Can_Loan is True) and (super().Bank_Balance > 0):
             if(self.__loaned_time < 2):
+                amount = input("Enter loan amount: ")
                 if(super().Bank_Balance < amount):
                     print(f"Sorry, current laon limit is {super().Bank_Balance}")
                 else:
@@ -89,10 +89,12 @@ class User(Bank):
         self.__transactions.append((time, change, amount, note))
 
     def check_history(self):
-        counter = 1
-        for Tn in self.__transactions:
-            print(f"{counter}. {Tn[0]} [{Tn[3]}] {Tn[1]}{Tn[2]}/-")
-            counter += 1
+        if(len(self.__transactions)>0):
+            counter = 1
+            for Tn in self.__transactions:
+                print(f"{counter}. {Tn[0]} [{Tn[3]}] {Tn[1]}{Tn[2]}/-")
+                counter += 1
+        else: print("You haven't made any Transactions yet!")
 
 
 class Admin(Bank):
@@ -133,6 +135,8 @@ class Admin(Bank):
     @property
     def toggle_loan():
         super().Can_Loan = not super().Can_Loan
+        if(super().Can_Loan is True): print("Loans Turned ON: Users can take loans now")
+        else: print("Loans Turned OFF: Users can't take loans now")
         
 
 def generateAC():
@@ -267,10 +271,10 @@ while(True):
                     break
 
         elif c == '5':
-            pass
+            caller.take_loan()
 
         elif c == '6':
-            pass
+            caller.check_history()
 
         elif c == '0':
             print("Logout Successful")
@@ -293,15 +297,18 @@ while(True):
         print("---------------------------")
 
         if c == '1':
-            pass
+            caller.show_all_users()
         elif c == '2':
-            pass
+            acNumber = input("Enter Account number to delete: ")
+            if acNumber not in op.users:
+                print("Failed! There is no such account in this bank")
+            else: caller.delete_user(acNumber)
         elif c == '3':
             caller.check_balance
         elif c == '4':
             caller.check_loaned
         elif c == '5':
-            pass
+            caller.toggle_loan
         elif c == '0':
             print("Logout Successful")
             break
