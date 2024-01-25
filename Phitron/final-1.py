@@ -15,14 +15,6 @@ class Bank:
                 acNumber += random.choice(valid_chars)
             if acNumber not in self._users: return acNumber
 
-    def set_balance(self, amount):
-        self._Bank_Balance += amount
-    def set_loaned(self, amount):
-        self._Loan_Given += amount
-    def Loan_feature(self, New):
-        self._Can_Loan = New
-
-
 class User(Bank):
     def __init__(self, acNumber, name, address, email, acType):
         self.__acNumber = acNumber
@@ -37,10 +29,8 @@ class User(Bank):
 
     @property
     def Balance(self) -> int: return self.__balance
-
     @property
     def Loaned(self) -> int: return self.__loaned_amount
-
     @property
     def account(self) -> str: return self.__acNumber
 
