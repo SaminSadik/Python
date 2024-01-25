@@ -34,44 +34,45 @@ class User(Bank):
         if(amount > 0):
             self.__balance += amount
             super().Bank_Balance += amount
+            self.transaction('+', amount, 'Deposited')
             print(f"{amount}/- Diposited Successfully!")
             self.Balance
-            self.transaction('+', amount, 'Deposited')
 
     def Withdraw(self, amount):
         if(super().Bank_Balance < amount):
             print("Oops! We are bankrupt")
-        elif(self.__balance >= amount):
+            if(super().Bank_Balance > 0):
+                limit = min(super().Bank_Balance, self.__balance)
+                print(f"Your current withdrawal limit: {limit}/-")
+        elif(self.__balance < amount):
+            print("Withdrawal amount exceeded")
+            self.Balance
+        else:
             self.__balance -= amount
             super().Bank_Balance -= amount
-            print(f"{amount}/- Withdrawn Successfully!")
-            self.Balance
             self.transaction('-', amount, 'Withdrawn')
-        else:
-            print("Withdrawal amount exceeded")
+            print(f"{amount}/- Withdrawn Successfully!")
             self.Balance
 
     def take_loan(self, amount):
         if(super().Can_Loan is True) and (super().Bank_Balance > 0):
             if(self.__loaned_time < 2):
-                while(super().Bank_Balance < amount):
+                if(super().Bank_Balance < amount):
                     print(f"Sorry, current laon limit is {super().Bank_Balance}")
-                    amount = int(input("New Loan Amount: "))
-                    if(amount < 1):
-                        print("Loan Request is Cancelled")
-                        return
-                self.Deposit(amount)
-                self.__loaned_time += 1
-                self.__loaned_amount += amount
-                super().Loan_Given += amount
-                super().Bank_Balance -= amount
-                self.transaction('+', amount, 'Took Loan')
+                else:
+                    self.Deposit(amount)
+                    self.__loaned_time += 1
+                    self.__loaned_amount += amount
+                    super().Loan_Given += amount
+                    super().Bank_Balance -= amount
+                    self.transaction('+', amount, 'Took Loan')
             else:
                 print("Denied! You've already taken max number of loans")
         else:
             print("Sorry, This bank is not offering Loans at this moment!")
 
     def pay_loan(self, amount) -> int:
+        # might move some works from here to interaction menu
         if(self.__loaned_amount>0):
             will_pay = ''
             while((will_pay != 'yes') and (will_pay != 'no')):
@@ -92,9 +93,9 @@ class User(Bank):
     def transfer(self, acNumber, amount):
         reciever = super().users[acNumber][0]
         reciever.Deposit(amount)
+        self.transaction('-', amount, 'Transfered')
         print(f"Successfully transfered {amount}/- to AC:{acNumber}")
         self.Balance
-        self.transaction('-', amount, 'Transfered')
 
     def transaction(self, change, amount, note):
         time = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
@@ -249,7 +250,7 @@ while(True):
             pass
         elif c == '0':
             print("Logout Successful")
-            signed = 'none'
+            break
         else:
             print("Invalid Entry! Try entering 0-6")
 
@@ -278,7 +279,7 @@ while(True):
             pass
         elif c == '0':
             print("Logout Successful")
-            signed = 'none'
+            break
         else:
             print("Invalid Entry! Try entering 0-5")
         
