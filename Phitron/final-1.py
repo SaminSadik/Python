@@ -1,11 +1,10 @@
 import datetime
 import random
-valid_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
+valid_chars = "0123456789_abcdefghijklmnopqrstuvwxyz"
 
 class Bank:
     __Bank_Balance = 0
     __Loan_Given = 0
-    # TODO: change all code involving Bank_Balance & Loan_Given to match the privacy
     Can_Loan = True
     users = {}
 
@@ -16,10 +15,18 @@ class Bank:
                 acNumber += random.choice(valid_chars)
             if acNumber not in self.users: return acNumber
 
-    def add_balance(self, amount):
+    @property
+    def Balance(self) -> int: return self.__Bank_Balance
+
+    @property
+    def Loaned(self) -> int: return self.__Loan_Given
+
+    @Balance.setter
+    def Balance(self, amount):
         self.Bank_Balance += amount
     
-    def add_loan(self, amount):
+    @Loaned.setter
+    def Loaned(self, amount):
         self.Loan_Given += amount
 
 class User(Bank):
@@ -45,7 +52,7 @@ class User(Bank):
 
     def Deposit(self, amount):
         self.__balance += amount
-        super().Bank_Balance += amount
+        super().Balance = amount
         self.transaction('+', amount, 'Deposited')
         print(f"{amount}/- Diposited Successfully!")
         self.show_Balance()
@@ -54,30 +61,30 @@ class User(Bank):
         if(self.__balance < amount):
             print("Withdrawal amount exceeded")
             self.show_Balance()
-        elif(super().Bank_Balance < amount):
+        elif(super().Balance < amount):
             print("Oops! We are bankrupt")
-            if(super().Bank_Balance > 0):
-                limit = min(super().Bank_Balance, self.__balance)
+            if(super().Balance > 0):
+                limit = min(super().Balance, self.__balance)
                 print(f"Your current withdrawal limit: {limit}/-")
         else:
             self.__balance -= amount
-            super().Bank_Balance -= amount
+            super().Balance = (-1 * amount)
             self.transaction('-', amount, 'Withdrawn')
             print(f"{amount}/- Withdrawn Successfully!")
             self.show_Balance()
 
     def take_loan(self):
-        if(super().Can_Loan is True) and (super().Bank_Balance > 0):
+        if(super().Can_Loan is True) and (super().Balance > 0):
             if(self.__loaned_time < 2):
                 amount = input("Enter loan amount: ")
-                if(super().Bank_Balance < amount):
-                    print(f"Sorry, current laon limit is {super().Bank_Balance}")
+                if(super().Balance < amount):
+                    print(f"Sorry, current laon limit is {super().Balance}")
                 else:
                     self.Deposit(amount)
                     self.__loaned_time += 1
                     self.__loaned_amount += amount
-                    super().Loan_Given += amount
-                    super().Bank_Balance -= amount
+                    super().Loaned = amount
+                    super().Balance = (-1 * amount)
                     self.transaction('+', amount, 'Took Loan')
             else:
                 print("Denied! You've already taken max number of loans")
@@ -86,8 +93,8 @@ class User(Bank):
 
     def pay_loan(self, amount):
         self.__loaned_amount -= amount
-        super().Bank_Balance += amount
-        super().Loan_Given -= amount
+        super().Balance = amount
+        super().Loaned = (-1 * amount)
         self.transaction('~', amount, 'Paid Loan')
         print("Loan paid successfully!", end = ' ')
         if(self.__loaned_amount != 0): print(f"Now you have {self.__loaned_amount}/- loan left")
@@ -141,11 +148,11 @@ class Admin(Bank):
 
     @property
     def check_balance():
-        print("Current Bank Balance:", super().Bank_Balance)
+        print("Current Bank Balance:", super().Balance)
 
     @property
     def check_loaned():
-        print("Total Loans Given:", super().Loan_Given)
+        print("Total Loans Given:", super().Loaned)
 
     @property
     def toggle_loan():
@@ -198,7 +205,7 @@ while(True):
             elif len(email.split("@")[0]) < 5:
                 print("Invalid entry! Too short")
             elif not all(c in valid_chars+'.@' for c in email):
-                print('Invalid character Error! Only use [a-z],[A-Z],[0-9],["@",".","_"]')
+                print('Invalid character Error! Only use [a-z],[0-9],[@],[.],[_]')
             else:
                 print("* Email Varification: Valid *")
                 break
