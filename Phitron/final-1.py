@@ -88,6 +88,8 @@ class User:
                     self.__loaned_amount += amount
                     self.__balance += amount
                     self.transaction('+', amount, 'Took Loan')
+                    print(f"**Recieved {amount}/- Loan**")
+                    self.show_balance()
             else:
                 print("* Denied! You've already taken max number of loans")
         else:
@@ -109,7 +111,7 @@ class User:
                 self.transaction('~', payment, 'Paid Loan')
                 print(f"**{payment}/- Loan paid successfully!**")
                 if(self.__loaned_amount != 0):
-                    print(f"Now you have {self.__loaned_amount}/- loan left")
+                    print(f"Now {self.__loaned_amount}/- loan left")
             return amount
 
     def transfer(self, acNumber):
@@ -122,8 +124,10 @@ class User:
         else:
             while(True):
                 amount = input("Enter transfer amount: ")
-                if (not amount.isnumeric()) or (int(amount)>self.__balance):
+                if (not amount.isnumeric()):
                     print("* Invalid amount! Try again")
+                elif (int(amount)>self.__balance) or (int(amount)==0):
+                    print("* Limit exceeded! Try again")
                     self.show_balance()
                 else:
                     amount = int(amount)
@@ -134,6 +138,7 @@ class User:
                     self.__balance -= amount
                     print(f"**Successfully transfered {amount}/- to AC:{acNumber}**")
                     self.show_balance()
+                    break
 
     def transaction(self, change, amount, note):
         time = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
@@ -229,7 +234,7 @@ def canLogin(acNumber, password) -> bool:
     return ((acNumber in Bank()._users) and (password == Bank()._users[acNumber][1]))
 
 
-#######################################################################
+######################################################################
 op = Bank()
 print("---------------------------")
 print("Welcome to Terminal Banking")
