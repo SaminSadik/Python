@@ -1,7 +1,5 @@
-# TODO: encapsulate (do more inside class rather inside user interation menu)
-
-from datetime import datetime
 import random
+from datetime import datetime
 valid_chars = "0123456789_abcdefghijklmnopqrstuvwxyz"
 secret_key = "********" # security for admin access
 
@@ -46,7 +44,7 @@ class User:
 
     def Deposit(self, amount):
         if not amount.isnumeric():
-            print("Invalid Entry")
+            print("* Invalid Entry")
             return
         amount = int(amount)
         if(self.__loaned_amount > 0): amount = self.pay_loan(amount)
@@ -55,19 +53,19 @@ class User:
         self.__balance += amount
         Bank._Bank_Balance += amount
         self.transaction('+', amount, 'Deposited')
-        print(f"{amount}/- Diposited Successfully!")
+        print(f"**{amount}/- Diposited Successfully!**")
         self.show_balance()
 
     def Withdraw(self, amount):
         if (not amount.isnumeric()) or (int(amount)==0):
-            print("Invalid Entry")
+            print("* Invalid Entry")
             return
         amount = int(amount)
         if(self.__balance < amount):
-            print("Withdrawal amount exceeded")
+            print("* Withdrawal amount exceeded")
             self.show_balance()
         elif(Bank._Bank_Balance < amount):
-            print("Oops! We are bankrupt")
+            print("* Oops! We are bankrupt")
             if(Bank._Bank_Balance > 0):
                 limit = min(Bank._Bank_Balance, self.__balance)
                 print(f"Your current withdrawal limit: {limit}/-")
@@ -75,7 +73,7 @@ class User:
             self.__balance -= amount
             Bank._Bank_Balance -= amount
             self.transaction('-', amount, 'Withdrawn')
-            print(f"{amount}/- Withdrawn Successfully!")
+            print(f"**{amount}/- Withdrawn Successfully!**")
             self.show_balance()
 
     def take_loan(self):
@@ -83,25 +81,24 @@ class User:
             if(self.__loaned_time < 2):
                 amount = int(input("Enter loan amount: "))
                 if(Bank._Bank_Balance < amount):
-                    print(f"Sorry, current laon limit is {Bank._Bank_Balance}")
+                    print(f"* Sorry, current laon limit is {Bank._Bank_Balance}")
                 else:
-                    self.transaction('~', amount, 'Took Loan')
-                    self.Deposit(amount)
+                    Bank._Loan_Given += amount
                     self.__loaned_time += 1
                     self.__loaned_amount += amount
-                    Bank._Loan_Given += amount
-                    Bank._Bank_Balance -= amount
+                    self.__balance += amount
+                    self.transaction('+', amount, 'Took Loan')
             else:
-                print("Denied! You've already taken max number of loans")
+                print("* Denied! You've already taken max number of loans")
         else:
-            print("Sorry, This bank is not offering Loans at this moment!")
+            print("**Sorry, This bank is not offering Loans at this moment!**")
 
     def pay_loan(self, amount) -> int:
         if amount == 0: return 0
         while(True):
             will_pay = input("Are you paying loans? (yes/no) --").lower()
             if((will_pay != 'yes') and (will_pay != 'no')):
-                print("Invalid entry! Enter yes or no please")
+                print("* Invalid entry! Enter yes or no please")
                 continue
             if(will_pay == 'yes'):
                 payment = min(amount, self.__loaned_amount)
@@ -110,23 +107,23 @@ class User:
                 Bank._Loan_Given -= payment
                 Bank._Bank_Balance += payment
                 self.transaction('~', payment, 'Paid Loan')
-                print("Loan paid successfully!", end = ' ')
+                print(f"**{payment}/- Loan paid successfully!**")
                 if(self.__loaned_amount != 0):
                     print(f"Now you have {self.__loaned_amount}/- loan left")
             return amount
 
     def transfer(self, acNumber):
         if acNumber not in Bank._users:
-            print("Transfer failed! There is no such account in this bank")
+            print("* Transfer failed! There is no such account in this bank")
         elif Bank._users[acNumber][2] == 'admin':
-            print("You can't transfer money to an Admin!")
+            print("* You can't transfer money to an Admin!")
         elif acNumber == self.__acNumber:
-            print("You can't transfer money to yourself!")
+            print("* You can't transfer money to yourself!")
         else:
             while(True):
                 amount = input("Enter transfer amount: ")
                 if (not amount.isnumeric()) or (int(amount)>self.__balance):
-                    print("Invalid amount! Try again")
+                    print("* Invalid amount! Try again")
                     self.show_balance()
                 else:
                     amount = int(amount)
@@ -135,7 +132,7 @@ class User:
                     reciever.transaction('+', amount, 'Transfered')
                     self.transaction('-', amount, 'Transfered')
                     self.__balance -= amount
-                    print(f"Successfully transfered {amount}/- to AC:{acNumber}")
+                    print(f"**Successfully transfered {amount}/- to AC:{acNumber}**")
                     self.show_balance()
 
     def transaction(self, change, amount, note):
@@ -148,7 +145,7 @@ class User:
             for Tn in self.__transactions:
                 print(f"{counter}. {Tn[0]} [{Tn[3]}] {Tn[1]}{Tn[2]}/-")
                 counter += 1
-        else: print("You haven't made any Transactions yet!")
+        else: print("* You haven't made any Transactions yet!")
 
     def __repr__(self) -> str:
         rep = f"""
@@ -177,9 +174,9 @@ class Admin:
 
     def delete_user(self, acNumber):
         if acNumber not in Bank._users:
-            print("Failed! There is no such account in this bank")
+            print("* Failed! There is no such account in this bank")
         elif Bank._users[acNumber][2] == 'admin':
-            print("Error! Can't delete an Admin account")
+            print("* Error! Can't delete an Admin account")
         else:
             ins = Bank._users[acNumber][0]
             cleared_loan = min(ins.__balance, ins.__loaned_amount)
@@ -187,7 +184,7 @@ class Admin:
             Bank._Loan_Given -= cleared_loan
             Bank._Bank_Balance -= refund
             del Bank._users[acNumber]
-            print(f"Account no. {acNumber} is Deleted successfully")
+            print(f"**Account no. {acNumber} is Deleted successfully**")
             print(f"Loan cleared {cleared_loan} & Balance refunded {refund}")
 
     def check_balance(self):
@@ -199,9 +196,9 @@ class Admin:
     def toggle_loan(self):
         Bank._Can_Loan = not Bank._Can_Loan
         if(Bank._Can_Loan is True):
-            print("Loans Turned ON: _users can take loans now")
+            print("* Loans Turned ON: users can take loans now")
         else:
-            print("Loans Turned OFF: _users can't take loans now")
+            print("* Loans Turned OFF: users can't take loans now")
 
     def __repr__(self) -> str:
         rep = f"""
@@ -218,13 +215,13 @@ def mail_validate() -> str:
     while(True):
         email = input("Enter a valid E-mail: ")
         if ('@' not in email) or ('.' not in email):
-            print("Invalid entry! Email must contain '@' and '.'")
+            print("* Invalid entry! Email must contain '@' and '.'")
         elif len(email.split("@")[0]) < 5:
-            print("Invalid entry! Too short")
+            print("* Invalid entry! Too short")
         elif not all(c in valid_chars+'.@' for c in email):
-            print('Invalid character Error! Only use [a-z],[0-9],[@],[.],[_]')
+            print('* Invalid character Error! Only use [a-z],[0-9],[@],[.],[_]')
         else:
-            print("* Email Varification Successful *")
+            print("* Email Varification Successful")
             return email
 
 # Login varificator:
@@ -256,11 +253,11 @@ while(True):
             ac = input("Access Type (USER or ADMIN): ").lower()
             if(ac=='user' or ac=='admin'): signed = ac
             else:
-                print("Invalid entry! Try again")
+                print("* Invalid entry! Try again")
         if(signed == 'admin'):
             access_key = input("Enter Admin Access Key: ")
             if(access_key != secret_key):
-                print("Access Denied! Invalid Key")
+                print("* Access Denied! Invalid Key")
                 continue
 
     # Creating a new Account:
@@ -273,14 +270,14 @@ while(True):
             while(True):
                 acType = input("Account Type (Savings/Current): ").lower()
                 if(acType!='savings' and acType!='current'):
-                    print("Invalid account type. Enter Savings or Current")
+                    print("* Invalid account type. Enter Savings or Current")
                 else:
                     caller = User(acNumber, name, address, email, acType)
                     break
         else: caller = Admin(acNumber, name, address, email)
         password = input("Enter new Password: ")
         op.create_account(acNumber, password, signed, caller)
-        print("* Account created Successfully *")
+        print("**Account created Successfully**")
         print("Signed in to AC:", acNumber)
 
     # Logging into an Existing account:
@@ -292,7 +289,7 @@ while(True):
             print("Signed in to AC:", acNumber)
             caller = op.get_Instance(acNumber)
         else:
-            print("Invalid AC number or password! Please try again.")
+            print("* Invalid AC number or password! Please try again.")
             continue
     
     # Program Terminator:
@@ -302,7 +299,7 @@ while(True):
 
     # Invalid manu-input Handing:
     else:
-        print("Invalid Entry! Try Entering 1-3\n")
+        print("* Invalid Entry! Try Entering 1-3\n")
         continue
 
     # User's repeating Menu:
@@ -329,7 +326,7 @@ while(True):
             caller.Deposit(amount)
         elif c == '4':
             if(caller.Balance == 0):
-                print("Transfer failed! Your balance is empty")
+                print("* Transfer failed! Your balance is empty")
                 continue
             acNumber = input("Enter reciever account number: ")
             caller.transfer(acNumber)
@@ -338,9 +335,9 @@ while(True):
         elif c == '6':
             caller.check_history()
         elif c == '0':
-            print("Logout Successful")
+            print("**Logout Successful**")
             break
-        else: print("Invalid Entry! Try entering 0-6")
+        else: print("* Invalid Entry! Try entering 0-6")
 
     # Admin's repeating Menu:
     while(signed == 'admin'):
@@ -367,7 +364,7 @@ while(True):
         elif c == '5':
             caller.toggle_loan()
         elif c == '0':
-            print("Logout Successful")
+            print("**Logout Successful**")
             break
-        else: print("Invalid Entry! Try entering 0-5")
+        else: print("* Invalid Entry! Try entering 0-5")
         
