@@ -117,10 +117,8 @@ class User:
             return amount
 
     def transfer(self, acNumber):
-        if(self.__balance == 0):
-            print("* Transfer failed! Your balance is empty")
-        elif acNumber not in Bank._users:
-            print("* Transfer failed! There is no such account in this bank")
+        if acNumber not in Bank._users:
+            print("* Account does not exist")
         elif Bank._users[acNumber][2] == 'admin':
             print("* You can't transfer money to an Admin!")
         elif acNumber == self.__acNumber:
@@ -335,12 +333,18 @@ while(True):
         if c == '1':
             caller.show_balance()
         elif c == '2':
+            if(caller.Balance == 0):
+                print("* Denied! Your Balance is Empty")
+                continue
             amount = input("Enter withdrawal Amount: ")
             caller.Withdraw(amount)
         elif c == '3':
             amount = input("Enter Deposit Amount: ")
             caller.Deposit(amount)
         elif c == '4':
+            if(caller.Balance == 0):
+                print("* Denied! Your Balance is Empty")
+                continue
             acNumber = input("Enter reciever account number: ")
             caller.transfer(acNumber)
         elif c == '5':
