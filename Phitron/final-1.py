@@ -1,7 +1,7 @@
 import random
 from datetime import datetime
 valid_chars = "0123456789_abcdefghijklmnopqrstuvwxyz"
-secret_key = "********" # security for admin access
+secret_key = "********"
 
 class Bank:
     _Bank_Balance = 0
@@ -9,12 +9,10 @@ class Bank:
     _Can_Loan = True
     _users = {}
 
-    # generating unique semi-random account number:
     def generate_AC(self, mail):
         while(True):
-            acNumber = mail.split("@")[0][:5] # personal part
-            for c in range(5): # random part
-                acNumber += random.choice(valid_chars)
+            acNumber = mail.split("@")[0][:5]
+            for _ in range(5): acNumber += random.choice(valid_chars)
             if acNumber not in self._users: return acNumber
     
     def create_account(self, acNumber, password, ac_type, instance):
@@ -44,21 +42,21 @@ class User:
     def show_balance(self):
         print(f"Your Current Balance: {self.__balance}/-")
 
-    def Deposit(self, amount):
+    def deposit(self, amount):
         if not amount.isnumeric():
             print("* Invalid Entry")
             return
+        
         amount = int(amount)
         if(self.__loaned_amount > 0): amount = self.pay_loan(amount)
         if(amount==0): return
-
         self.__balance += amount
         Bank._Bank_Balance += amount
         self.transaction('+', amount, 'Deposited')
         print(f"**{amount}/- Diposited Successfully!**")
         self.show_balance()
 
-    def Withdraw(self, amount):
+    def withdraw(self, amount):
         if (not amount.isnumeric()) or (int(amount)==0):
             print("* Invalid Entry")
             return
@@ -155,7 +153,7 @@ class User:
         else: print("* You haven't made any Transactions yet!")
 
     def __repr__(self) -> str:
-        rep = f"""
+        return f"""
 Access Type     : User
 Account Number  : {self.__acNumber}
 User Name       : {self.__name}
@@ -166,7 +164,6 @@ Current Balance : {self.__balance}/-
 Total Loans Due : {self.__loaned_amount}/-
 Loan Recieved   : x{self.__loaned_time}
         """
-        return rep
 
 
 class Admin:
@@ -189,21 +186,20 @@ class Admin:
             ins = Bank._users[acNumber][0]
             del Bank._users[acNumber]
             print(f"**Account no. {acNumber} is Deleted successfully**")
-
             cleared_loan = min(ins.Balance, ins.Loans)
             refund = ins.Balance - cleared_loan
-            Bank._Loan_Given -= cleared_loan
-            Bank._Bank_Balance -= min(refund, Bank._Bank_Balance)
             if(Bank._Bank_Balance < refund):
                 print(f"Unable to refund {refund-Bank._Bank_Balance}/- for Bankruptcy")
                 refund = Bank._Bank_Balance
             print(f"Loan cleared {cleared_loan}/- & Balance cleared {refund}/-")
+            Bank._Loan_Given -= cleared_loan
+            Bank._Bank_Balance -= min(refund, Bank._Bank_Balance)
 
     def check_balance(self):
-        print("Current Bank Balance:", Bank._Bank_Balance)
+        print(f"Current Bank Balance: {Bank._Bank_Balance}/-")
 
     def check_loaned(self):
-        print("Total Loans Given:", Bank._Loan_Given)
+        print(f"Total Loans Given: {Bank._Loan_Given}/-")
 
     def toggle_loan(self):
         Bank._Can_Loan = not Bank._Can_Loan
@@ -213,16 +209,16 @@ class Admin:
             print("* Loans Turned OFF: users can't take loans now")
 
     def __repr__(self) -> str:
-        rep = f"""
+        return f"""
 Access Type     : Admin
 Account Number  : {self.__acNumber}
 User Name       : {self.__name}
 User E-Mail     : {self.__email}
 User Address    : {self.__address}
         """
-        return rep
+    
 
-# Email validator for new account Registration:
+# Email validator for Registration:
 def mail_validate() -> str:
     while(True):
         email = input("Enter a valid E-mail: ")
@@ -236,7 +232,7 @@ def mail_validate() -> str:
             print("* Email Varification Successful")
             return email
 
-# Login varificator:
+# Login varifier:
 def canLogin(acNumber, password) -> bool:
     if (acNumber in Bank()._users) and (password==Bank()._users[acNumber][1]):
         return True
@@ -337,10 +333,10 @@ while(True):
                 print("* Denied! Your Balance is Empty")
                 continue
             amount = input("Enter withdrawal Amount: ")
-            caller.Withdraw(amount)
+            caller.withdraw(amount)
         elif c == '3':
             amount = input("Enter Deposit Amount: ")
-            caller.Deposit(amount)
+            caller.deposit(amount)
         elif c == '4':
             if(caller.Balance == 0):
                 print("* Denied! Your Balance is Empty")
