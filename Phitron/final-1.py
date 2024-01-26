@@ -1,6 +1,9 @@
+# TODO: encapsulate (do more inside class rather inside user interation menu)
+
 from datetime import datetime
 import random
 valid_chars = "0123456789_abcdefghijklmnopqrstuvwxyz"
+secret_key = "********"
 
 class Bank:
     _Bank_Balance = 0
@@ -8,15 +11,18 @@ class Bank:
     _Can_Loan = True
     _users = {}
 
-    def generate_AC(self, username):
+    def generate_AC(self, mail):
         while(True):
-            acNumber = username
+            acNumber = mail.split("@")[0][:5]
             for c in range(5):
                 acNumber += random.choice(valid_chars)
             if acNumber not in self._users: return acNumber
     
-    def create_account(self, acNumber, instance, password, ac_type):
-        self.__users[acNumber] = (instance, password, ac_type)
+    def create_account(self, acNumber, password, ac_type, instance):
+        self._users[acNumber] = (instance, password, ac_type)
+
+    def get_Instance(self, acNumber):
+        return self._users[acNumber][0]
 
 class User:
     def __init__(self, acNumber, name, address, email, acType):
@@ -48,6 +54,10 @@ class User:
         self.show_Balance()
 
     def Withdraw(self, amount):
+        if (not amount.isnumeric()) or (int(amount)==0):
+            print("Invalid Entry")
+            return
+        amount = int(amount)
         if(self.__balance < amount):
             print("Withdrawal amount exceeded")
             self.show_Balance()
@@ -70,12 +80,12 @@ class User:
                 if(Bank._Bank_Balance < amount):
                     print(f"Sorry, current laon limit is {Bank._Bank_Balance}")
                 else:
+                    self.transaction('~', amount, 'Took Loan')
                     self.Deposit(amount)
                     self.__loaned_time += 1
                     self.__loaned_amount += amount
                     Bank._Loan_Given += amount
                     Bank._Bank_Balance -= amount
-                    self.transaction('+', amount, 'Took Loan')
             else:
                 print("Denied! You've already taken max number of loans")
         else:
@@ -112,14 +122,14 @@ class User:
 
     def __repr__(self) -> str:
         rep = f"""
-        Access Type     :User
-        Account Number  :{self.__acNumber}
-        User Name       :{self.__name}
-        User E-Mail     :{self.__email}
-        User Address    :{self.__address}
-        Account Type    :{self.__acType}
-        Current Balance :{self.__balance}
-        Loan Recieved   :{self.__loaned_time}
+Access Type     :User
+Account Number  :{self.__acNumber}
+User Name       :{self.__name}
+User E-Mail     :{self.__email}
+User Address    :{self.__address}
+Account Type    :{self.__acType}
+Current Balance :{self.__balance}
+Loan Recieved   :{self.__loaned_time}
         """
         return rep
 
@@ -135,6 +145,7 @@ class Admin:
         for (key, val) in Bank._users.items():
             print(val[0])
 
+#! remove (balance-loaned) from bank balance
     def delete_user(self, acNumber):
         del Bank._users[acNumber]
         print(f"Account no. {acNumber} is Deleted successfully")
@@ -155,37 +166,50 @@ class Admin:
 
     def __repr__(self) -> str:
         rep = f"""
-        Access Type     :Admin
-        Account Number  :{self.__acNumber}
-        User Name       :{self.__name}
-        User E-Mail     :{self.__email}
-        User Address    :{self.__address}
+Access Type     :Admin
+Account Number  :{self.__acNumber}
+User Name       :{self.__name}
+User E-Mail     :{self.__email}
+User Address    :{self.__address}
         """
         return rep
-        
-op = Bank()
-cmd = '0'
-secret_key = '********'
 
+def mail_validate() -> str:
+    while(True):
+        email = input("Enter a valid E-mail: ")
+        if ('@' not in email) or ('.' not in email):
+            print("Invalid entry! Email must contain '@' and '.'")
+        elif len(email.split("@")[0]) < 5:
+            print("Invalid entry! Too short")
+        elif not all(c in valid_chars+'.@' for c in email):
+            print('Invalid character Error! Only use [a-z],[0-9],[@],[.],[_]')
+        else:
+            print("* Email Varification Successful *")
+            return email
+        
+def canLogin(acNumber, password) -> bool:
+    return ((acNumber in Bank()._users) and (password == Bank()._users[acNumber][1]))
+
+
+op = Bank()
 #######################################################################
 
 print("---------------------------")
 print("Welcome to Terminal Banking")
 
 while(True):
-    caller = None
-    signed = None
+    caller = None # will store object of the required class
+    signed = None # will indicate access type (user/admin)
     print("---------------------------")
     print("What would you like to do ?")
     print("[1] Create an Account")
     print("[2] Login to your Account")
     print("[3] Exit")
     print("---------------------------")
-    cmd = input("ENTRY: ")
+    cmd = input("ENTRY: ") # Outer Repeating System
     print("---------------------------")
-    if(cmd=='3'):
-        print("Thanks for visiting Terminal Banking, Come again\n")
-        break
+    
+    # Identifying User or Admin first, to login/register/interact accordingly:
     if(cmd=='1' or cmd=='2'):
         while(signed is None):
             ac = input("Access Type (USER or ADMIN): ").lower()
@@ -198,53 +222,44 @@ while(True):
                 print("Access Denied! Invalid Key")
                 continue
 
+    # Creating a new Account:
     if(cmd=='1'):
         name = input("Enter you Name: ")
         address = input("Enter your Address: ")
-
-        email = ''
-        while(True):
-            email = input("Enter a valid E-mail: ")
-            if ('@' not in email) or ('.' not in email):
-                print("Invalid entry! Email must contain '@' and '.'")
-            elif len(email.split("@")[0]) < 5:
-                print("Invalid entry! Too short")
-            elif not all(c in valid_chars+'.@' for c in email):
-                print('Invalid character Error! Only use [a-z],[0-9],[@],[.],[_]')
-            else:
-                print("* Email Varification: Valid *")
-                break
-
-        acType = None
-        while(signed == 'user'):
-            acType = input("Account Type (Savings/Current): ").lower()
-            if(acType!='savings' and acType!='current'):
-                print("Invalid account type. Enter Savings or Current")
-            else: break
-
-        if(signed == 'admin'):
-            caller = Admin(acNumber, name, address, email)
-        else:
-            caller = User(acNumber, name, address, email, acType)
-
+        email = mail_validate()
+        acNumber = op.generate_AC(email)
+        if(signed == 'user'):
+            while(True):
+                acType = input("Account Type (Savings/Current): ").lower()
+                if(acType!='savings' and acType!='current'):
+                    print("Invalid account type. Enter Savings or Current")
+                else:
+                    caller = User(acNumber, name, address, email, acType)
+                    break
+        else: caller = Admin(acNumber, name, address, email)
         password = input("Enter new Password: ")
-
-        acNumber = op.generate_AC(email.split("@")[0][:5])
-        op.create_account(acNumber, caller, password, signed)
+        op.create_account(acNumber, password, signed, caller)
         print("* Account created Successfully *")
         print("Signed in to AC:", acNumber)
 
+    # Logging into an Existing account:
     elif(cmd=='2'):
         print("Enter Valid Login Info -")
         acNumber = input("Account Number: ")
         password = input("Password: ")
-        if (acNumber not in op._users) or (password != op._users[acNumber][1]):
+        if canLogin(acNumber, password):
+            print("Signed in to AC:", acNumber)
+            caller = op.get_Instance(acNumber)
+        else:
             print("Invalid AC number or password! Please try again.")
             continue
-        else:
-            print("Signed in to AC:", acNumber)
-            caller = op._users[acNumber][0]
-        
+    
+    # Program Terminator:
+    elif(cmd=='3'):
+        print("Thanks for visiting Terminal Banking, Come again\n")
+        break
+
+    # Invalid manu-input Handing:
     else:
         print("Invalid Entry! Try Entering 1-3\n")
         continue
@@ -260,7 +275,7 @@ while(True):
         print("[6] Check Transaction History")
         print("[0] Logout from Account")
         print("---------------------------")
-        c = input("ENTRY: ")
+        c = input("ENTRY: ") # user's repeating system
         print("---------------------------")
 
         if c == '1':
@@ -268,8 +283,7 @@ while(True):
 
         elif c == '2':
             amount = input("Enter withdrawal Amount: ")
-            if amount.isnumeric() and (int(amount) != 0): caller.Withdraw(int(amount))
-            else: print("Invalid Entry")
+            caller.Withdraw(amount)
 
         elif c == '3':
             amount = input("Enter Deposit Amount: ")
