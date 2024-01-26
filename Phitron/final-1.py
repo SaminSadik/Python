@@ -48,10 +48,10 @@ class User(Bank):
         if(self.__balance < amount):
             print("Withdrawal amount exceeded")
             self.show_Balance()
-        elif(super()._Bank_Balance < amount):
+        elif(Bank._Bank_Balance < amount):
             print("Oops! We are bankrupt")
-            if(super()._Bank_Balance > 0):
-                limit = min(super()._Bank_Balance, self.__balance)
+            if(Bank._Bank_Balance > 0):
+                limit = min(Bank._Bank_Balance, self.__balance)
                 print(f"Your current withdrawal limit: {limit}/-")
         else:
             self.__balance -= amount
@@ -61,11 +61,11 @@ class User(Bank):
             self.show_Balance()
 
     def take_loan(self):
-        if(super()._Can_Loan is True) and (super()._Bank_Balance > 0):
+        if(Bank._Can_Loan is True) and (Bank._Bank_Balance > 0):
             if(self.__loaned_time < 2):
                 amount = int(input("Enter loan amount: "))
-                if(super()._Bank_Balance < amount):
-                    print(f"Sorry, current laon limit is {super()._Bank_Balance}")
+                if(Bank._Bank_Balance < amount):
+                    print(f"Sorry, current laon limit is {Bank._Bank_Balance}")
                 else:
                     self.Deposit(amount)
                     self.__loaned_time += 1
@@ -87,7 +87,7 @@ class User(Bank):
         if(self.__loaned_amount != 0): print(f"Now you have {self.__loaned_amount}/- loan left")
 
     def transfer(self, acNumber, amount):
-        reciever = super()._users[acNumber][0]
+        reciever = Bank._users[acNumber][0]
         reciever.__balance += amount
         reciever.transaction('+', amount, 'Transfered')
         self.__balance -= amount
@@ -129,28 +129,25 @@ class Admin(Bank):
         self.__email = email
 
     def show_all__users(self):
-        for (key, val) in super()._users.items():
+        for (key, val) in Bank._users.items():
             print(val[0])
 
     def delete_user(self, acNumber):
-        if super()._users[acNumber][2] == 'admin':
-            print("Error! Can't delete an Admin account")
-        else:
-            del super()._users[acNumber]
-            print(f"Account no. {acNumber} is Deleted successfully")
+        del Bank._users[acNumber]
+        print(f"Account no. {acNumber} is Deleted successfully")
 
     @property
     def check_balance(self):
-        print("Current Bank Balance:", super()._Bank_Balance)
+        print("Current Bank Balance:", Bank._Bank_Balance)
 
     @property
     def check_loaned(self):
-        print("Total Loans Given:", super()._Loan_Given)
+        print("Total Loans Given:", Bank._Loan_Given)
 
     @property
     def toggle_loan(self):
         Bank._Can_Loan = not Bank._Can_Loan
-        if(super()._Can_Loan is True): print("Loans Turned ON: _users can take loans now")
+        if(Bank._Can_Loan is True): print("Loans Turned ON: _users can take loans now")
         else: print("Loans Turned OFF: _users can't take loans now")
 
     def __repr__(self) -> str:
@@ -213,7 +210,7 @@ while(True):
                 print("* Email Varification: Valid *")
                 break
 
-        acNumber = op.generate_account(email.split("@")[0][:5])
+        acNumber = Bank().generate_account(email.split("@")[0][:5])
 
         acType = None
         while(signed == 'user'):
@@ -228,7 +225,7 @@ while(True):
             caller = User(acNumber, name, address, email, acType)
 
         password = input("Enter new Password: ")
-        op._users[acNumber] = (caller, password, signed)
+        Bank()._users[acNumber] = (caller, password, signed)
         print("Account created Successfully!")
         print("Signed in to AC:", acNumber)
 
@@ -236,12 +233,12 @@ while(True):
         print("Enter Valid Login Info -")
         acNumber = input("Account Number: ")
         password = input("Password: ")
-        if (acNumber not in op._users) or (password != op._users[acNumber][1]):
+        if (acNumber not in Bank()._users) or (password != Bank()._users[acNumber][1]):
             print("Invalid AC number or password! Please try again.")
             continue
         else:
             print("Signed in to AC:", acNumber)
-            caller = op._users[acNumber][0]
+            caller = Bank()._users[acNumber][0]
         
     else:
         print("Invalid Entry! Try Entering 1-3\n")
@@ -293,9 +290,9 @@ while(True):
                 continue
 
             acNumber = input("Enter reciever account number: ")
-            if acNumber not in op._users:
+            if acNumber not in Bank()._users:
                 print("Transfer failed! There is no such account in this bank")
-            elif op._users[acNumber][2] == 'admin':
+            elif Bank()._users[acNumber][2] == 'admin':
                 print("You can't transfer money to an Admin!")
             elif acNumber == caller.account:
                 print("You can't transfer money to yourself!")
@@ -339,8 +336,10 @@ while(True):
             caller.show_all__users()
         elif c == '2':
             acNumber = input("Enter Account number to delete: ")
-            if acNumber not in op._users:
+            if acNumber not in Bank()._users:
                 print("Failed! There is no such account in this bank")
+            elif Bank()._users[acNumber][2] == 'admin':
+                print("Error! Can't delete an Admin account")
             else: caller.delete_user(acNumber)
         elif c == '3':
             caller.check_balance
