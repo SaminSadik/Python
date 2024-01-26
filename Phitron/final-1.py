@@ -8,14 +8,17 @@ class Bank:
     _Can_Loan = True
     _users = {}
 
-    def generate_account(self, username):
+    def generate_AC(self, username):
         while(True):
             acNumber = username
             for c in range(5):
                 acNumber += random.choice(valid_chars)
             if acNumber not in self._users: return acNumber
+    
+    def create_account(self, acNumber, instance, password, ac_type):
+        self.__users[acNumber] = (instance, password, ac_type)
 
-class User(Bank):
+class User:
     def __init__(self, acNumber, name, address, email, acType):
         self.__acNumber = acNumber
         self.__name = name
@@ -121,7 +124,7 @@ class User(Bank):
         return rep
 
 
-class Admin(Bank):
+class Admin:
     def __init__(self, acNumber, name, address, email):
         self.__acNumber = acNumber
         self.__name = name
@@ -160,13 +163,14 @@ class Admin(Bank):
         """
         return rep
         
-
-print("---------------------------")
-print("Welcome to Terminal Banking")
-
 op = Bank()
 cmd = '0'
 secret_key = '********'
+
+#######################################################################
+
+print("---------------------------")
+print("Welcome to Terminal Banking")
 
 while(True):
     caller = None
@@ -197,6 +201,7 @@ while(True):
     if(cmd=='1'):
         name = input("Enter you Name: ")
         address = input("Enter your Address: ")
+
         email = ''
         while(True):
             email = input("Enter a valid E-mail: ")
@@ -209,8 +214,6 @@ while(True):
             else:
                 print("* Email Varification: Valid *")
                 break
-
-        acNumber = Bank().generate_account(email.split("@")[0][:5])
 
         acType = None
         while(signed == 'user'):
@@ -225,20 +228,22 @@ while(True):
             caller = User(acNumber, name, address, email, acType)
 
         password = input("Enter new Password: ")
-        Bank()._users[acNumber] = (caller, password, signed)
-        print("Account created Successfully!")
+
+        acNumber = op.generate_AC(email.split("@")[0][:5])
+        op.create_account(acNumber, caller, password, signed)
+        print("* Account created Successfully *")
         print("Signed in to AC:", acNumber)
 
     elif(cmd=='2'):
         print("Enter Valid Login Info -")
         acNumber = input("Account Number: ")
         password = input("Password: ")
-        if (acNumber not in Bank()._users) or (password != Bank()._users[acNumber][1]):
+        if (acNumber not in op._users) or (password != op._users[acNumber][1]):
             print("Invalid AC number or password! Please try again.")
             continue
         else:
             print("Signed in to AC:", acNumber)
-            caller = Bank()._users[acNumber][0]
+            caller = op._users[acNumber][0]
         
     else:
         print("Invalid Entry! Try Entering 1-3\n")
@@ -290,9 +295,9 @@ while(True):
                 continue
 
             acNumber = input("Enter reciever account number: ")
-            if acNumber not in Bank()._users:
+            if acNumber not in op._users:
                 print("Transfer failed! There is no such account in this bank")
-            elif Bank()._users[acNumber][2] == 'admin':
+            elif op._users[acNumber][2] == 'admin':
                 print("You can't transfer money to an Admin!")
             elif acNumber == caller.account:
                 print("You can't transfer money to yourself!")
@@ -336,9 +341,9 @@ while(True):
             caller.show_all__users()
         elif c == '2':
             acNumber = input("Enter Account number to delete: ")
-            if acNumber not in Bank()._users:
+            if acNumber not in op._users:
                 print("Failed! There is no such account in this bank")
-            elif Bank()._users[acNumber][2] == 'admin':
+            elif op._users[acNumber][2] == 'admin':
                 print("Error! Can't delete an Admin account")
             else: caller.delete_user(acNumber)
         elif c == '3':
