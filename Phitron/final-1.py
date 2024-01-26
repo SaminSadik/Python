@@ -244,7 +244,7 @@ op = Bank()
 print("---------------------------")
 print("Welcome to Terminal Banking")
 
-# Main(outer) Repeating System:
+# Main(outer) Replica System:
 while(True):
     caller = None # will store object of the required class
     signed = None # will indicate access type (user/admin)
@@ -294,10 +294,10 @@ while(True):
         acNumber = input("Account Number: ")
         password = input("Password: ")
         if canLogin(acNumber, password):
-            print("Signed in to AC:", acNumber)
             access = op.get_Access(acNumber)
             caller = access[0]
             signed = access[1]
+            print("Signed in to AC:", acNumber)
         else:
             print("* Invalid AC number or password! Please try again.")
             continue
