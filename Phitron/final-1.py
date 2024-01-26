@@ -20,8 +20,8 @@ class Bank:
     def create_account(self, acNumber, password, ac_type, instance):
         self._users[acNumber] = (instance, password, ac_type)
 
-    def get_Instance(self, acNumber):
-        return self._users[acNumber][0]
+    def get_Access(self, acNumber):
+        return [self._users[acNumber][0], self._users[acNumber][2]] 
 
 
 class User:
@@ -38,6 +38,8 @@ class User:
 
     @property
     def Balance(self) -> int: return self.__balance
+    @property
+    def Loans(self) -> int: return self.__loaned_amount
 
     def show_balance(self):
         print(f"Your Current Balance: {self.__balance}/-")
@@ -115,7 +117,9 @@ class User:
             return amount
 
     def transfer(self, acNumber):
-        if acNumber not in Bank._users:
+        if(self.__balance == 0):
+            print("* Transfer failed! Your balance is empty")
+        elif acNumber not in Bank._users:
             print("* Transfer failed! There is no such account in this bank")
         elif Bank._users[acNumber][2] == 'admin':
             print("* You can't transfer money to an Admin!")
@@ -154,14 +158,15 @@ class User:
 
     def __repr__(self) -> str:
         rep = f"""
-Access Type     :User
-Account Number  :{self.__acNumber}
-User Name       :{self.__name}
-User E-Mail     :{self.__email}
-User Address    :{self.__address}
-Account Type    :{self.__acType}
-Current Balance :{self.__balance}
-Loan Recieved   :{self.__loaned_time}
+Access Type     : User
+Account Number  : {self.__acNumber}
+User Name       : {self.__name}
+User E-Mail     : {self.__email}
+User Address    : {self.__address}
+Account Type    : {self.__acType}
+Current Balance : {self.__balance}/-
+Total Loans Due : {self.__loaned_amount}/-
+Loan Recieved   : x{self.__loaned_time}
         """
         return rep
 
@@ -184,13 +189,17 @@ class Admin:
             print("* Error! Can't delete an Admin account")
         else:
             ins = Bank._users[acNumber][0]
-            cleared_loan = min(ins.__balance, ins.__loaned_amount)
-            refund = max((ins.__balance - ins.__loaned_amount), 0)
-            Bank._Loan_Given -= cleared_loan
-            Bank._Bank_Balance -= refund
             del Bank._users[acNumber]
             print(f"**Account no. {acNumber} is Deleted successfully**")
-            print(f"Loan cleared {cleared_loan} & Balance refunded {refund}")
+
+            cleared_loan = min(ins.Balance, ins.Loans)
+            refund = ins.Balance - cleared_loan
+            Bank._Loan_Given -= cleared_loan
+            Bank._Bank_Balance -= min(refund, Bank._Bank_Balance)
+            if(Bank._Bank_Balance < refund):
+                print(f"Unable to refund {refund-Bank._Bank_Balance}/- for Bankruptcy")
+                refund = Bank._Bank_Balance
+            print(f"Loan cleared {cleared_loan}/- & Balance cleared {refund}/-")
 
     def check_balance(self):
         print("Current Bank Balance:", Bank._Bank_Balance)
@@ -207,11 +216,11 @@ class Admin:
 
     def __repr__(self) -> str:
         rep = f"""
-Access Type     :Admin
-Account Number  :{self.__acNumber}
-User Name       :{self.__name}
-User E-Mail     :{self.__email}
-User Address    :{self.__address}
+Access Type     : Admin
+Account Number  : {self.__acNumber}
+User Name       : {self.__name}
+User E-Mail     : {self.__email}
+User Address    : {self.__address}
         """
         return rep
 
@@ -231,7 +240,9 @@ def mail_validate() -> str:
 
 # Login varificator:
 def canLogin(acNumber, password) -> bool:
-    return ((acNumber in Bank()._users) and (password == Bank()._users[acNumber][1]))
+    if (acNumber in Bank()._users) and (password==Bank()._users[acNumber][1]):
+        return True
+    else: return False
 
 
 ######################################################################
@@ -251,22 +262,19 @@ while(True):
     print("---------------------------")
     cmd = input("ENTRY: ") 
     print("---------------------------")
-    
-    # Identifying User or Admin first, to login/register/interact accordingly:
-    if(cmd=='1' or cmd=='2'):
-        while(signed is None):
+        
+    # Creating a new Account:
+    if(cmd=='1'):
+        while(signed is None): # identifying user/admin for later interaction
             ac = input("Access Type (USER or ADMIN): ").lower()
             if(ac=='user' or ac=='admin'): signed = ac
-            else:
-                print("* Invalid entry! Try again")
-        if(signed == 'admin'):
+            else: print("* Invalid entry! Try again")
+        if(signed == 'admin'): # some security for accessing Admin account
             access_key = input("Enter Admin Access Key: ")
             if(access_key != secret_key):
                 print("* Access Denied! Invalid Key")
                 continue
 
-    # Creating a new Account:
-    if(cmd=='1'):
         name = input("Enter you Name: ")
         address = input("Enter your Address: ")
         email = mail_validate()
@@ -281,6 +289,7 @@ while(True):
                     break
         else: caller = Admin(acNumber, name, address, email)
         password = input("Enter new Password: ")
+
         op.create_account(acNumber, password, signed, caller)
         print("**Account created Successfully**")
         print("Signed in to AC:", acNumber)
@@ -292,7 +301,9 @@ while(True):
         password = input("Password: ")
         if canLogin(acNumber, password):
             print("Signed in to AC:", acNumber)
-            caller = op.get_Instance(acNumber)
+            access = op.get_Access(acNumber)
+            caller = access[0]
+            signed = access[1]
         else:
             print("* Invalid AC number or password! Please try again.")
             continue
@@ -330,9 +341,6 @@ while(True):
             amount = input("Enter Deposit Amount: ")
             caller.Deposit(amount)
         elif c == '4':
-            if(caller.Balance == 0):
-                print("* Transfer failed! Your balance is empty")
-                continue
             acNumber = input("Enter reciever account number: ")
             caller.transfer(acNumber)
         elif c == '5':
@@ -372,4 +380,4 @@ while(True):
             print("**Logout Successful**")
             break
         else: print("* Invalid Entry! Try entering 0-5")
-        
+######################################################################
