@@ -46,7 +46,6 @@ class User:
         if not amount.isnumeric():
             print("* Invalid Entry")
             return
-        
         amount = int(amount)
         if(self.__loaned_amount > 0): 
             amount = self.pay_loan(amount)
