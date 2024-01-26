@@ -48,8 +48,9 @@ class User:
             return
         
         amount = int(amount)
-        if(self.__loaned_amount > 0): amount = self.pay_loan(amount)
-        if(amount==0): return
+        if(self.__loaned_amount > 0): 
+            amount = self.pay_loan(amount)
+            if(amount==0): return
         self.__balance += amount
         Bank._Bank_Balance += amount
         self.transaction('+', amount, 'Deposited')
