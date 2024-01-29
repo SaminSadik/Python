@@ -2,13 +2,8 @@
 class Star_Cinema:
     _hall_list = []
 
-<<<<<<< HEAD
-    def _entry_hall(self, hall): # private doesn't work like this
-        self.__hall_list.append(hall)
-=======
     def _entry_hall(self, hall):
         self._hall_list.append(hall)
->>>>>>> bc95e1f0ab58c5ba4f4c051491ec8010d307e736
 
 # Subclass with private instance variables, & methods to access as needed:
 class Hall(Star_Cinema):
@@ -17,14 +12,6 @@ class Hall(Star_Cinema):
         self.__show_list = []
         self.__rows = rows
         self.__cols = cols
-<<<<<<< HEAD
-        self.__hall_no = halls
-        super()._entry_hall(self)
-
-    def entry_show(self, id, movie, time):     
-        self.__show_list.append((id, movie, time))
-        self.__seats[id] = self.generate_seats(self.__rows, self.__cols)
-=======
         self.__hall_no = hall
         self._booked = {} # for keeping track of the booked seats
         super()._entry_hall(self) # sending instance to superclass
@@ -34,7 +21,6 @@ class Hall(Star_Cinema):
         self.__show_list.append((id, movie_name, time))
         self.__seats[id] = self.generate_seats(self.__rows, self.__cols)
         # creats an 2d matrix as seats, corresponding to the id
->>>>>>> bc95e1f0ab58c5ba4f4c051491ec8010d307e736
 
 # Modifies __seats, validity of id & seat_list is ensured before calling:
     def book_seats(self, id, seat_list):
@@ -107,20 +93,6 @@ class Hall(Star_Cinema):
             return max_seats-len(self._booked[id])
         else: return max_seats
 
-    def check_id(self, id) -> bool:
-        if id in self.__seats: return False
-        return True
-    
-    def generate_seats(rows, cols):
-        matrix = []
-        for row in range(ord('A'), ord('A') + rows):
-            row_values = []
-            for col in range(0, cols):
-                cell_value = f' {chr(row)}{col} '
-                row_values.append(cell_value)
-            matrix.append(row_values)
-        return matrix
-
 
 # creating the object with fixed rows, cols & hall_no for simplicity:
 customer = Hall(5,6,'STAR1')
@@ -144,32 +116,6 @@ while(True):
     print('-------------------------------')
     op = input("ENTRY:  ")
 
-<<<<<<< HEAD
-    if op == '5':
-        print('Thank you for visiting Star Cinema. Come again!')
-        break
-
-    customer = Hall(5,6,'A1')
-
-    if op == '4':
-        id = input('Enter unique ID of the show: ')
-        while(customer.check_id(id) is False):
-            print(f'Sorry! A show with ID "{id}" already exits!')
-            id = input('Please try a different ID: ')
-        movie = input('Enter Name of the show: ')
-        time = input('Enter Time of the show: ')
-        customer.entry_show(id, movie, time)
-        print(f'You made a new entry. [Movie: {movie} (ID {id}) @ {time}]')
-
-    if op == '3':
-        pass
-
-    if op == '2':
-        id = input('Please enter the show ID: ')
-        customer.view_available_seats(id)
-
-=======
->>>>>>> bc95e1f0ab58c5ba4f4c051491ec8010d307e736
     if op == '1':
         print('-------------------------------')
         customer.view_show_list()
