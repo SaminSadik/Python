@@ -32,5 +32,3 @@ if 10 in Tupl[1:7]: # if not found, index() would've thrown error
     print('0 found at Index', Tupl.index(10, 1, 7)) # search in range
 # 2nd (starting index) & 3rd (ending index) parameters are optional
 else: print('10 is not Found, But Errors Avoided')
-
- # TODO: add important methods like append()
